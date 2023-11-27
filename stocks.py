@@ -181,6 +181,6 @@ print(f"Greatest profit: ${gp}")
 gl = greatest_loss(profit_per_trade)
 print(f"Greatest loss: ${gl}")
 
-# total_profit = profit_calculator(profit_per_trade)
-# print(f"Total profit: {total_profit}")
+total_profit = profit_calculator(profit_per_trade)
+print(f"Total profit: {total_profit}")
 
