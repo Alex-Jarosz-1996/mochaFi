@@ -134,7 +134,7 @@ def greatest_loss(lst):
 # Fetch historical data
 # formatted_date = datetime.today().date().strftime('%Y-%m-%d')
 # data = yf.download('AAPL', start='2020-01-01', end=formatted_date)
-data = yf.download('AAPL', period="5y", interval="1d")
+data = yf.download('SPY', period="5y", interval="1d")
 data = data.drop("Adj Close", axis=1).round(2)
 
 # Strategy: Calculate moving averages
@@ -172,8 +172,8 @@ num_loss_trades = number_loss_trades(profit_per_trade)
 print(f"Number of loss trades: {num_loss_trades}")
 
 pct_win, pct_loss = pct_win_loss_trades(profit_per_trade)
-print(f"% trades won: {round(pct_win*100)}%")
-print(f"% trades loss: {round(pct_loss*100)}%")
+print(f"% trades won: {round(pct_win*100, 2)}%")
+print(f"% trades loss: {round(pct_loss*100, 2)}%")
 
 gp = greatest_profit(profit_per_trade)
 print(f"Greatest profit: ${gp}")
@@ -182,5 +182,5 @@ gl = greatest_loss(profit_per_trade)
 print(f"Greatest loss: ${gl}")
 
 total_profit = profit_calculator(profit_per_trade)
-print(f"Total profit: {total_profit}")
+print(f"Total profit: {round(total_profit, 2)}")
 
