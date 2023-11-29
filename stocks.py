@@ -43,8 +43,8 @@ num_loss_trades = number_loss_trades(profit_per_trade)
 print(f"Number of loss trades: {num_loss_trades}")
 
 pct_win, pct_loss = pct_win_loss_trades(profit_per_trade)
-print(f"% trades won: {round(pct_win*100, 2)}%")
-print(f"% trades loss: {round(pct_loss*100, 2)}%")
+print(f"% trades won: {round_result(pct_win*100)}%")
+print(f"% trades loss: {round_result(pct_loss*100)}%")
 
 gp = greatest_profit(profit_per_trade)
 print(f"Greatest profit: ${gp}")
@@ -53,5 +53,5 @@ gl = greatest_loss(profit_per_trade)
 print(f"Greatest loss: ${gl}")
 
 total_profit = profit_calculator(profit_per_trade)
-print(f"Total profit: {round(total_profit, 2)}")
+print(f"Total profit: ${round_result(total_profit)}")
 

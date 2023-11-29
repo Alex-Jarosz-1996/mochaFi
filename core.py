@@ -127,3 +127,9 @@ def greatest_profit(lst):
 
 def greatest_loss(lst):
     return min(lst)
+
+
+def round_result(result):
+    num_dp = 2
+    return round(result, num_dp)
+    
