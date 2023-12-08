@@ -1,4 +1,37 @@
 import pandas as pd
+import yfinance as yf
+
+import yfinance as yf
+from pandas import DataFrame
+
+def get_yf_stock_data(ticker: str, 
+                      time_period: str,
+                      time_interval: str = "1d") -> DataFrame:
+    """
+    Retrieve stock data using Yahoo Finance API.
+
+    Parameters:
+    - ticker (str): The stock ticker symbol.
+    - time_period (str): The time period for which to retrieve data (e.g., "1mo", "3mo", "1y").
+    - time_interval (str, optional): The time interval for data (default is "1d").
+
+    Returns:
+    - DataFrame: Pandas DataFrame containing stock data.
+
+    Note:
+    - The 'ticker' parameter must be a string.
+    """
+    
+    if not isinstance(ticker, str):
+        return None
+    
+    data = yf.download(tickers=ticker, 
+                       period=time_period, 
+                       interval=time_interval)
+    data = data.drop("Adj Close", axis=1).round(2)
+    return data
+
+
 
 def determine_signal(lst: pd.Series):
     result = []
