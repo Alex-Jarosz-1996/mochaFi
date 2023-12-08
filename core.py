@@ -10,16 +10,10 @@ def get_yf_stock_data(ticker: str,
     """
     Retrieve stock data using Yahoo Finance API.
 
-    Parameters:
-    - ticker (str): The stock ticker symbol.
-    - time_period (str): The time period for which to retrieve data (e.g., "1mo", "3mo", "1y").
-    - time_interval (str, optional): The time interval for data (default is "1d").
-
-    Returns:
-    - DataFrame: Pandas DataFrame containing stock data.
-
-    Note:
-    - The 'ticker' parameter must be a string.
+    NOTE:
+    >>> ticker        : "stock1" or "stock1 stock2 stockn"
+    >>> time_period   : 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
+    >>> time_interval : 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
     """
     
     if not isinstance(ticker, str):
