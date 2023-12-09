@@ -1,4 +1,3 @@
 class AlgorithmDefinition:
-    def __init__(self, algorithmName, stock_data):
-        self.algorithmName = algorithmName
+    def __init__(self, stock_data):
         self.data = stock_data

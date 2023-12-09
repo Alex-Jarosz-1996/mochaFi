@@ -12,9 +12,9 @@ from MA_50_200_day import Strategy
 if __name__ == "__main__":
     data = get_yf_stock_data("SPY", "5y")
     
-    algo_defs = AlgorithmDefinition("MA_50_200_day", data)
+    algo_defs = AlgorithmDefinition(data)
     
-    strategy = Strategy(algo_defs)
+    strategy = Strategy("MA_50_200_day", algo_defs)
     
     trades = BuySellTrades(strategy)
     

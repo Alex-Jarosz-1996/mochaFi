@@ -1,8 +1,10 @@
 from algo_core import AlgorithmDefinition
 
 class Strategy(AlgorithmDefinition):
-    def __init__(self, algo: AlgorithmDefinition):
-        super().__init__(algo.algorithmName, algo.data)
+    def __init__(self, algorithmName, algo: AlgorithmDefinition):
+        self.algorithmName = algorithmName
+        
+        super().__init__(algo.data)
         
         # Strategy: Calculate moving averages
         self.data['MA50'] = round(algo.data['Close'].rolling(50).mean(), 2)
