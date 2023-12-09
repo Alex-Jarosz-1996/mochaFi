@@ -1,13 +1,11 @@
-import pandas as pd
+from core.algo_core import AlgorithmDefinition
+from core.yf_core import get_yf_stock_data
+from core.results import StrategyResult
+from core.trades import BuySellTrades
 
-from algo_core import AlgorithmDefinition
-from core import get_yf_stock_data, round_result
-from results import StrategyResult
-from trades import BuySellTrades
-
-# from MA_50_200_day import Strategy
-# from MACD_crossover import Strategy
-from MACD_crossover_inverted import Strategy 
+from strategies.MA_50_200_day import Strategy
+# from strategies.MACD_crossover import Strategy
+# from strategies.MACD_crossover_inverted import Strategy 
 
 
      

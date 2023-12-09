@@ -1,4 +1,5 @@
-from algo_core import AlgorithmDefinition
+from core.algo_core import AlgorithmDefinition
+
 
 class Strategy(AlgorithmDefinition):
     def __init__(self, algorithmName, algo: AlgorithmDefinition):

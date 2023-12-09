@@ -1,7 +1,7 @@
 from ta.trend import MACD
 
-from algo_core import AlgorithmDefinition
-from core import round_result
+from core.algo_core import AlgorithmDefinition
+from core.yf_core import round_result
 
 class Strategy(AlgorithmDefinition):
     def __init__(self, algorithmName, algo: AlgorithmDefinition):
