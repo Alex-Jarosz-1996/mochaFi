@@ -3,10 +3,7 @@ from core.yf_core import get_yf_stock_data
 from core.results import StrategyResult
 from core.trades import BuySellTrades
 
-from strategies.MA_50_200_day import Strategy
-# from strategies.MACD_crossover import Strategy
-# from strategies.MACD_crossover_inverted import Strategy 
-
+from strategies.VW_MACD import Strategy
 
      
 if __name__ == "__main__":
@@ -19,4 +16,4 @@ if __name__ == "__main__":
     trades = BuySellTrades(strategy)
     
     results = StrategyResult(trades)
-
+    print(results.total_profit)
