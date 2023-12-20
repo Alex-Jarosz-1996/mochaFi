@@ -19,7 +19,7 @@ class Strategy(AlgorithmDefinition):
         self.data["slow_vw_macd"] = self._ema(self.data["vol_price"].rolling(slow_window).sum() / self.data["Volume"], slow_window)
         self.data["fast_vw_macd"] = self._ema(self.data["vol_price"].rolling(fast_window).sum() / self.data["Volume"], fast_window)
         
-        self.data["macd"] = self.data["fast_vw_macd"] - self.data["slow_vw_macd"]
+        self.data["macd"] = self.data["slow_vw_macd"] - self.data["fast_vw_macd"]
         self.data["macd_signal"] = self._ema(self.data["vol_price"].rolling(signal_window).sum() / self.data["Volume"], signal_window)
         self.data["macd_diff"] = self.data["macd"] - self.data["macd_signal"]
 
