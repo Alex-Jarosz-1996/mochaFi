@@ -17,11 +17,16 @@ def get_yf_stock_data(ticker: str,
     if not isinstance(ticker, str):
         return None
     
-    data = yf.download(tickers=ticker, 
-                       period=time_period, 
-                       interval=time_interval)
-    data = data.drop("Adj Close", axis=1).round(2)
-    return data
+    try:
+        data = yf.download(tickers=ticker, 
+                        period=time_period, 
+                        interval=time_interval)
+        data = data.drop("Adj Close", axis=1).round(2)
+        return data
+    
+    except Exception as e:
+        print(f"Error occured: {e}")
+        return None
 
 
 def round_result(result):
