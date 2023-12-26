@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJ AI</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="container mt-5">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" id="chart-tab" data-toggle="tab" href="#chart">Chart</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="analysis-tab" data-toggle="tab" href="#analysis">Analysis</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="perform-tab" data-toggle="tab" href="#perform">Perform</a>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-2">
+        <div class="tab-pane fade show active" id="chart">
+            <h3>Chart Tab Content Goes Here</h3>
+        </div>
+        <div class="tab-pane fade" id="analysis">
+            <h3>Analysis Tab Content Goes Here</h3>
+            <p>This is some additional content for the Analysis tab.</p>
+        </div>
+        <div class="tab-pane fade" id="perform">
+            <h3>Perform Tab Content Goes Here</h3>
+            <p>This is some additional content for the Perform tab.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        $('.nav-link').on('click', function(e){
+            e.preventDefault(); // Prevent the default behavior of the link
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            // Show the corresponding tab content
+            var targetTab = $(this).attr('href');
+            $('.tab-pane').removeClass('show active');
+            $(targetTab).addClass('show active');
+        });
+    });
+</script>
+
+</body>
+</html>
