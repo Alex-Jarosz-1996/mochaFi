@@ -11,23 +11,3 @@ export const StyledContainer = styled.div`
   padding: 20px;
   margin-top: 50px;
 `;
-
-export const StyledNavTabs = styled.ul`
-  display: flex;
-  list-style-type: none;
-  margin-bottom: 20px;
-`;
-
-export const StyledTab = styled.li`
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  cursor: pointer;
-  background-color: ${(props) => (props.active ? '#007bff' : 'inherit')};
-  color: ${(props) => (props.active ? '#ffffff' : 'inherit')};
-  border-radius: 5px;
-`;
-
-export const StyledTabPane = styled.div`
-  padding: 20px;
-`;
