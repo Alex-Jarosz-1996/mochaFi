@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 
 import Chart from './Chart/Chart';
+import Home from './Home/Home';
 import Strategy from './Strategy/Strategy';
 import Trading from './Trading/Trading';
 
@@ -71,16 +72,16 @@ export default function VerticalTabs() {
         aria-label="Vertical tabs example"
         sx={{ borderRight: 1, borderColor: 'divider' }}
       >
-        <Tab label="Chart" {...a11yProps(0)} />
-        <Tab label="Strategy" {...a11yProps(1)} />
-        <Tab label="Trading" {...a11yProps(2)} />
+        <Tab label="Home" {...a11yProps(0)} />  
+        <Tab label="Chart" {...a11yProps(1)} />
+        <Tab label="Strategy" {...a11yProps(2)} />
+        <Tab label="Trading" {...a11yProps(3)} />
       </Tabs>
       
       <TabPanel value={value} index={0}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Chart />} />  
-            <Route path="/chart" element={<Chart />} />  
+            <Route path="/" element={<Home />} />  
           </Routes>
         </BrowserRouter>  
       </TabPanel>
@@ -88,12 +89,20 @@ export default function VerticalTabs() {
       <TabPanel value={value} index={1}>
         <BrowserRouter>
           <Routes>
-            <Route path="/strategy" element={<Strategy />} />  
+            <Route path="/chart" element={<Chart />} />  
           </Routes>
         </BrowserRouter>  
       </TabPanel>
       
       <TabPanel value={value} index={2}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/strategy" element={<Strategy />} />  
+          </Routes>
+        </BrowserRouter>  
+      </TabPanel>
+      
+      <TabPanel value={value} index={3}>
         <BrowserRouter>
           <Routes>
             <Route path="/trading" element={<Trading />} />  
