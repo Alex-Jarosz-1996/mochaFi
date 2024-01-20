@@ -4,6 +4,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 
 import Chart from './Chart/Chart';
 import Strategy from './Strategy/Strategy';
@@ -70,15 +75,32 @@ export default function VerticalTabs() {
         <Tab label="Strategy" {...a11yProps(1)} />
         <Tab label="Trading" {...a11yProps(2)} />
       </Tabs>
+      
       <TabPanel value={value} index={0}>
-        <Chart/>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Chart />} />  
+            <Route path="/chart" element={<Chart />} />  
+          </Routes>
+        </BrowserRouter>  
       </TabPanel>
+      
       <TabPanel value={value} index={1}>
-        <Strategy/>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/strategy" element={<Strategy />} />  
+          </Routes>
+        </BrowserRouter>  
       </TabPanel>
+      
       <TabPanel value={value} index={2}>
-        <Trading/>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/trading" element={<Trading />} />  
+          </Routes>
+        </BrowserRouter>
       </TabPanel>
+    
     </Box>
   );
 }
