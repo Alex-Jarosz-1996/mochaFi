@@ -10,10 +10,10 @@ import {
   Route,
 } from "react-router-dom";
 
-import Chart from './Chart/Chart';
-import Home from './Home/Home';
-import Strategy from './Strategy/Strategy';
-import Trading from './Trading/Trading';
+import Chart from './chart/Chart';
+import Home from './home/Home';
+import Strategy from './strategy/Strategy';
+import Trading from './trading/Trading';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
