@@ -1,22 +1,16 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
+import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import Chart from './chart/Chart';
 import Home from './home/Home';
+import Chart from './chart/Chart';
 import Strategy from './strategy/Strategy';
 import Trading from './trading/Trading';
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index } = props;
 
   return (
     <div
@@ -24,31 +18,13 @@ function TabPanel(props) {
       hidden={value !== index}
       id={`vertical-tabpanel-${index}`}
       aria-labelledby={`vertical-tab-${index}`}
-      {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`,
-  };
-}
-
-export default function VerticalTabs() {
+const VerticalTabs = () => {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -56,60 +32,39 @@ export default function VerticalTabs() {
   };
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        bgcolor: 'background.paper',
-        display: 'flex',
-        height: 224,
-      }}
-    >
-      <Tabs
-        orientation="vertical"
-        variant="scrollable"
-        value={value}
-        onChange={handleChange}
-        aria-label="Vertical tabs example"
-        sx={{ borderRight: 1, borderColor: 'divider' }}
+    <Router>
+      <Box
+        sx={{
+          flexGrow: 1,
+          bgcolor: 'background.paper',
+          display: 'flex',
+          height: 224,
+        }}
       >
-        <Tab label="Home" {...a11yProps(0)} />  
-        <Tab label="Chart" {...a11yProps(1)} />
-        <Tab label="Strategy" {...a11yProps(2)} />
-        <Tab label="Trading" {...a11yProps(3)} />
-      </Tabs>
-      
-      <TabPanel value={value} index={0}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />  
-          </Routes>
-        </BrowserRouter>  
-      </TabPanel>
-      
-      <TabPanel value={value} index={1}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/chart" element={<Chart />} />  
-          </Routes>
-        </BrowserRouter>  
-      </TabPanel>
-      
-      <TabPanel value={value} index={2}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/strategy" element={<Strategy />} />  
-          </Routes>
-        </BrowserRouter>  
-      </TabPanel>
-      
-      <TabPanel value={value} index={3}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/trading" element={<Trading />} />  
-          </Routes>
-        </BrowserRouter>
-      </TabPanel>
-    
-    </Box>
+        <Tabs
+          orientation="vertical"
+          variant="scrollable"
+          value={value}
+          onChange={handleChange}
+          aria-label="Vertical tabs example"
+          sx={{ borderRight: 1, borderColor: 'divider' }}
+        >
+          <Tab value={0} label="Home" />
+          <Tab value={1} label="Chart" />
+          <Tab value={2} label="Strategy" />
+          <Tab value={3} label="Trading" />
+        </Tabs>
+
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="/home" element={<TabPanel value={value} index={0}><Home /></TabPanel>} />
+          <Route path="/chart" element={<TabPanel value={value} index={1}><Chart /></TabPanel>} />
+          <Route path="/strategy" element={<TabPanel value={value} index={2}><Strategy /></TabPanel>} />
+          <Route path="/trading" element={<TabPanel value={value} index={3}><Trading /></TabPanel>} />
+        </Routes>
+      </Box>
+    </Router>
   );
-}
+};
+
+export default VerticalTabs;
