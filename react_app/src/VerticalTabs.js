@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 import Home from './home/Home';
 import Chart from './chart/Chart';
@@ -26,44 +26,64 @@ function TabPanel(props) {
 
 const VerticalTabs = () => {
   const [value, setValue] = React.useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Update tab based on current path
+    switch(location.pathname) {
+      case '/home': setValue(0); break;
+      case '/chart': setValue(1); break;
+      case '/strategy': setValue(2); break;
+      case '/trading': setValue(3); break;
+      default: setValue(0); break;
+    }
+  }, [location]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+
+    // Navigate based on tab selection
+    switch(newValue) {
+      case 0: navigate('/home'); break;
+      case 1: navigate('/chart'); break;
+      case 2: navigate('/strategy'); break;
+      case 3: navigate('/trading'); break;
+      default: break;
+    }
   };
 
   return (
-    <Router>
-      <Box
-        sx={{
-          flexGrow: 1,
-          bgcolor: 'background.paper',
-          display: 'flex',
-          height: 224,
-        }}
+    <Box
+      sx={{
+        flexGrow: 1,
+        bgcolor: 'background.paper',
+        display: 'flex',
+        height: 224,
+      }}
+    >
+      <Tabs
+        orientation="vertical"
+        variant="scrollable"
+        value={value}
+        onChange={handleChange}
+        aria-label="Vertical tabs example"
+        sx={{ borderRight: 1, borderColor: 'divider' }}
       >
-        <Tabs
-          orientation="vertical"
-          variant="scrollable"
-          value={value}
-          onChange={handleChange}
-          aria-label="Vertical tabs example"
-          sx={{ borderRight: 1, borderColor: 'divider' }}
-        >
-          <Tab value={0} label="Home" />
-          <Tab value={1} label="Chart" />
-          <Tab value={2} label="Strategy" />
-          <Tab value={3} label="Trading" />
-        </Tabs>
+        <Tab label="Home" />
+        <Tab label="Chart" />
+        <Tab label="Strategy" />
+        <Tab label="Trading" />
+      </Tabs>
 
-        <Routes>
-          <Route path="/" element={<Navigate to="/home" />} />
-          <Route path="/home" element={<TabPanel value={value} index={0}><Home /></TabPanel>} />
-          <Route path="/chart" element={<TabPanel value={value} index={1}><Chart /></TabPanel>} />
-          <Route path="/strategy" element={<TabPanel value={value} index={2}><Strategy /></TabPanel>} />
-          <Route path="/trading" element={<TabPanel value={value} index={3}><Trading /></TabPanel>} />
-        </Routes>
-      </Box>
-    </Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/home" element={<TabPanel value={value} index={0}><Home /></TabPanel>} />
+        <Route path="/chart" element={<TabPanel value={value} index={1}><Chart /></TabPanel>} />
+        <Route path="/strategy" element={<TabPanel value={value} index={2}><Strategy /></TabPanel>} />
+        <Route path="/trading" element={<TabPanel value={value} index={3}><Trading /></TabPanel>} />
+      </Routes>
+    </Box>
   );
 };
 

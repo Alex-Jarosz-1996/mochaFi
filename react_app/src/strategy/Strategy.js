@@ -3,7 +3,7 @@ import React from 'react';
 const Strategy = () => {
   return (
     <div>
-      <h3>TO BE UPDATED SOON</h3>
+      <h3>Strategy Tab Content Goes Here</h3>
     </div>
   );
 };
