@@ -5,20 +5,26 @@ const Chart = () => {
   const [timePeriod, setTimePeriod] = useState('1y');
   const [timeInterval, setTimeInterval] = useState('1d');
   const [chartData, setChartData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const backend_url = `http://localhost:5000/chart?ticker=${ticker}&time_period=${timePeriod}&time_interval=${timeInterval}`;
 
   const fetchData = async () => {
+    setIsLoading(true); // Start loading
     try {
       const response = await fetch(backend_url);
       if (response.ok) {
         const data = await response.json();
-        setChartData(data); // Assuming the response is JSON data
+        setChartData(data);
       } else {
         console.error('Failed to fetch data.');
+        // Optionally set chartData to null or an error state here
       }
     } catch (error) {
       console.error('Error while fetching data:', error);
+      // Optionally handle the error more visibly
+    } finally {
+      setIsLoading(false); // End loading regardless of outcome
     }
   };
   
@@ -83,13 +89,17 @@ const Chart = () => {
       <div>
         <button onClick={handleEnter}>Enter</button>
       </div>
-      <div>
-        {chartData && (
-          <div>
-            <h2>Fetched Data</h2>
-            <pre>{JSON.stringify(chartData, null, 2)}</pre>
-          </div>
-        )}
+        <div>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : chartData ? (
+            <div>
+              <h2>Fetched Data</h2>
+              <pre>{JSON.stringify(chartData, null, 2)}</pre>
+            </div>
+          ) : (
+            <div>No data to display</div>
+          )}
       </div>
     </div>
   );
