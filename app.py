@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_app.core.yf_core import get_yf_stock_data
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app=app)
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():

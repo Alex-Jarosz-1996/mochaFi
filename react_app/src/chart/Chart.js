@@ -1,12 +1,12 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState } from 'react';
 
 const Chart = () => {
-  const [ticker, setTicker] = useState();
+  const [ticker, setTicker] = useState('');
   const [timePeriod, setTimePeriod] = useState('1y');
   const [timeInterval, setTimeInterval] = useState('1d');
   const [chartData, setChartData] = useState(null);
 
-  const backend_url = `http://localhost:5000//chart?ticker=${ticker}&time_period=${timePeriod}&time_interval=${timeInterval}`;
+  const backend_url = `http://localhost:5000/chart?ticker=${ticker}&time_period=${timePeriod}&time_interval=${timeInterval}`;
 
   const fetchData = async () => {
     try {
@@ -21,14 +21,9 @@ const Chart = () => {
       console.error('Error while fetching data:', error);
     }
   };
-
-  useEffect(() => {
-    // Fetch data when component mounts or when the URL parameters change
-    fetchData();
-  }, [ticker, timePeriod, timeInterval]);
   
-  const handleEnter = () => {  
-    window.location.href = backend_url; // Redirect to the specified URL
+  const handleEnter = (e) => {
+    fetchData();
   };
   
   return (
