@@ -31,14 +31,11 @@ class Stock(db.Model):
         self.country = country
 
 
-class FinancialData(db.Model):
-    __tablename__ = 'financial_data'
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.Integer, db.ForeignKey('stock.code'), nullable=False)
-    price = db.Column(db.Float)
-    volume = db.Column(db.Integer)
-    eps = db.Column(db.Float)
-    pe_ratio = db.Column(db.Float)
+# TODO: ADD
+# class FinancialData(db.Model):
+#     __tablename__ = 'financial_data'
+#     id = db.Column(db.Integer, primary_key=True)
+#     code = db.Column(db.Integer, db.ForeignKey('stock.code'), nullable=False)
 
 
 # TODO: ADD
@@ -56,7 +53,7 @@ class FinancialData(db.Model):
 #     __tablename__ = "trade_bot"
 
 @app.route('/stats', methods=['GET', 'POST'])
-def get_stock_data():
+def stock_data():
     if request.method == 'GET':
         pass
 
@@ -73,8 +70,8 @@ def get_stock_data():
             obj = StockController(code, country)
             
             # saving to database
-            stock = Stock(code=obj.si.ticker, 
-                            country=obj.si.country)
+            stock = Stock(code=obj.si.ticker,
+                          country=obj.si.country)
             db.session.add(stock)
             db.session.commit()
 
