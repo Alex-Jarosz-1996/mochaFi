@@ -1,16 +1,20 @@
 class StrategyResult:
     def __init__(self, buy_sell_trades_obj):
         self.data = buy_sell_trades_obj.data
-        self.buy_sell_pairs = self.map_buy_sell_actions(self.data['BuyPrice'], self.data['SellPrice'])
+        self.buy_sell_pairs = self.map_buy_sell_actions(
+            self.data["BuyPrice"], self.data["SellPrice"]
+        )
         self.num_buy_sell_pairs = self.get_num_buy_sell_pairs(self.buy_sell_pairs)
         self.profit_per_trade = self.profit_calculator_per_instance(self.buy_sell_pairs)
-        self.num_profit_trades, self.num_loss_trades = self.calculate_profit_loss_trades(self.profit_per_trade)
+        (
+            self.num_profit_trades,
+            self.num_loss_trades,
+        ) = self.calculate_profit_loss_trades(self.profit_per_trade)
         self.pct_win, self.pct_loss = self.calculate_pct_win_loss(self.profit_per_trade)
         self.greatest_profit = max(self.profit_per_trade)
         self.greatest_loss = min(self.profit_per_trade)
         self.total_profit = sum(self.profit_per_trade)
 
-    
     @staticmethod
     def map_buy_sell_actions(buy_prices, sell_prices):
         actions = []
@@ -47,5 +51,3 @@ class StrategyResult:
         pct_win = (num_profit / total_trades) * 100 if total_trades > 0 else 0
         pct_loss = (num_loss / total_trades) * 100 if total_trades > 0 else 0
         return pct_win, pct_loss
-
-

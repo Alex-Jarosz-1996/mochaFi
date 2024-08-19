@@ -3,7 +3,7 @@ from backend.data.us.us_stock_class import US_StockClass
 
 
 class StockController:
-    def __init__(self, code: str, country: str) :
+    def __init__(self, code: str, country: str):
         if country.lower() == "aus":
             self.si = AusStockClass(ticker=code)
 
