@@ -25,7 +25,10 @@ class Stock(db.Model):
     __tablename__ = "stock"
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), unique=True, nullable=False)
-    country = db.Column(db.String(5))
+    country = db.Column(db.String(5), unique=True, nullable=False)
+
+    def __repr__(self) -> str:
+        return "<Stock>"
 
     def __init__(self, code, country):
         self.code = code
