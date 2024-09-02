@@ -11,28 +11,25 @@ from backend.data.utils.controller import StockController
 
 # initialising flask app
 app = Flask(__name__)
+CORS(app=app)
 
 # Configuring db
 db_path = os.path.join(os.path.dirname(__file__), "app.db")
 db_uri = f"sqlite:///{db_path}"
 app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
-CORS(app=app)
 
-
-class Stock(db.Model):
+class StockModel(db.Model):
     __tablename__ = "stock"
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), unique=True, nullable=False)
-    country = db.Column(db.String(5), unique=True, nullable=False)
+    country = db.Column(db.String(5), unique=False, nullable=False)
 
-    def __repr__(self) -> str:
-        return "<Stock>"
-
-    def __init__(self, code, country):
-        self.code = code
-        self.country = country
+    def __repr__(self):
+        return f"<Stock {self.stock}>"
 
 
 # TODO: ADD
@@ -57,67 +54,60 @@ class Stock(db.Model):
 #     __tablename__ = "trade_bot"
 
 
-@app.route("/stats", methods=["GET", "POST"])
-def stock_data():
-    if request.method == "GET":
-        pass
+# Create the database tables
+with app.app_context():
+    db.create_all()
 
-    if request.method == "POST":
-        data = request.json
-        country = data.get("country")
-        code = data.get("code")
+# API route to handle stock selection and save to database
+@app.route('/stock', methods=['POST'])
+def add_stock():
+    data = request.json
+    code = data.get('stock')
+    country = data.get('country')
 
-        if not country or not code:
-            return jsonify({"error": "Missing 'stock_type' or 'ticker' parameter"}), 400
+    print(f"Received request to add stock: {code} from {country}")
 
-        try:
-            # determining which object to use
-            obj = StockController(code, country)
+    # Check if the stock-country combination already exists
+    existing_stock = StockModel.query.filter_by(code=code, country=country).first()
+    if existing_stock:
+        return jsonify({"error": "Stock already exists"}), 409
 
-            # saving to database
-            stock = Stock(code=obj.si.ticker, country=obj.si.country)
-            db.session.add(stock)
-            db.session.commit()
+    stock_obj = StockController(code, country)
+    
+    new_stock = StockModel(code=stock_obj.si.ticker, country=stock_obj.si.country)
+    db.session.add(new_stock)
+    db.session.commit()
 
-            response = {"code": stock.code, "country": stock.country}
-            return jsonify(response), 200
+    return jsonify({
+        "message": "Stock added successfully",
+        "code": code,
+        "country": country
+    }), 201
 
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
+
+@app.route('/stocks', methods=['GET'])
+def get_stocks():
+    stocks = StockModel.query.all()
+    return jsonify([
+        {"id": stock.id, "code": stock.code, "country": stock.country}  # Changed 'stock' to 'code'
+        for stock in stocks
+    ])
 
 
-@app.route("/chart", methods=["GET", "POST"])
-def chart():
-    if request.method == "GET":
-        ticker = request.args.get("ticker", default=None)
-        time_period = request.args.get("time_period", default=None)
-        time_interval = request.args.get("time_interval", default="1d")
+@app.route('/stock/<int:stock_id>', methods=['DELETE'])
+def delete_stock(stock_id):
+    try:
+        stock = StockModel.query.get(stock_id)
+        if not stock:
+            return jsonify({"error": "Stock not found"}), 404
 
-        if ticker is None or time_period is None:
-            return jsonify({"error": "Missing parameters"}), 400
+        db.session.delete(stock)
+        db.session.commit()
 
-        data = get_yf_stock_data(ticker, time_period, time_interval)
-
-        if data is not None:
-            return jsonify(data.to_dict(orient="split"))
-        else:
-            return jsonify({"error": "Data retrieval failed"}), 500
-
-    elif request.method == "POST":
-        data = request.get_json()
-        ticker = data.get("ticker", None)
-        time_period = data.get("time_period", None)
-        time_interval = data.get("time_interval", "1d")
-
-        if ticker is None or time_period is None:
-            return jsonify({"error": "Missing parameters"}), 400
-
-        data = get_yf_stock_data(ticker, time_period, time_interval)
-
-        if data is not None:
-            return jsonify(data.to_dict(orient="split"))
-        else:
-            return jsonify({"error": "Data retrieval failed"}), 500
+        return jsonify({"message": "Stock deleted successfully"}), 200
+    except Exception as e:
+        print(f"Error deleting stock: {e}")
+        return jsonify({"error": "Error deleting stock"}), 500
 
 
 if __name__ == "__main__":
