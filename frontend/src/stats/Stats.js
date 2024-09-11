@@ -154,8 +154,8 @@ const Stats = () => {
                 <td>${formatNumber(stock.eps)}</td>
                 <td>{formatNumber(stock.evToEBITDA)}</td>
                 <td>{formatNumber(stock.evToRev)}</td>
-                <td>{formatNumber(stock.peRatioTrail)}</td>
-                <td>{formatNumber(stock.peRatioForward)}</td>
+                <td>{formatPercentage(stock.peRatioTrail)}</td>
+                <td>{formatPercentage(stock.peRatioForward)}</td>
                 <td>{formatNumber(stock.priceToSales)}</td>
                 <td>{formatNumber(stock.priceToBook)}</td>
                 <td>{formatPercentage(stock.dividendYield)}</td>
@@ -165,33 +165,33 @@ const Stats = () => {
                 <td>${formatNumber(stock.bookValPerShare)}</td>
                 <td>${formatNumber(stock.cash)}</td>
                 <td>${formatNumber(stock.cashPerShare)}</td>
-                <td>{formatPercentage(stock.cashToMarketCap)}</td>
+                <td>${formatPercentage(stock.cashToMarketCap)}</td>
                 <td>{formatNumber(stock.cashToDebt)}</td>
                 <td>${formatNumber(stock.debt)}</td>
                 <td>{formatPercentage(stock.debtToMarketCap)}</td>
                 <td>{formatPercentage(stock.debtToEquityRatio)}</td>
                 <td>{formatPercentage(stock.returnOnAssets)}</td>
                 <td>{formatPercentage(stock.returnOnEquity)}</td>
-                <td>{formatNumber(stock.ebitda)}</td>
-                <td>{formatNumber(stock.ebitdaPerShare)}</td>
+                <td>${formatNumber(stock.ebitda)}</td>
+                <td>${formatNumber(stock.ebitdaPerShare)}</td>
                 <td>{formatPercentage(stock.earningsGrowth)}</td>
-                <td>{formatNumber(stock.grossProfit)}</td>
-                <td>{formatNumber(stock.grossProfitPerShare)}</td>
-                <td>{formatNumber(stock.netIncome)}</td>
-                <td>{formatNumber(stock.netIncomePerShare)}</td>
-                <td>{formatPercentage(stock.operatingMargin)}</td>
-                <td>{formatPercentage(stock.profitMargin)}</td>
-                <td>{formatNumber(stock.revenue)}</td>
+                <td>${formatNumber(stock.grossProfit)}</td>
+                <td>${formatNumber(stock.grossProfitPerShare)}</td>
+                <td>${formatNumber(stock.netIncome)}</td>
+                <td>${formatNumber(stock.netIncomePerShare)}</td>
+                <td>${formatPercentage(stock.operatingMargin)}</td>
+                <td>${formatPercentage(stock.profitMargin)}</td>
+                <td>${formatNumber(stock.revenue)}</td>
                 <td>{formatPercentage(stock.revenueGrowth)}</td>
-                <td>{formatNumber(stock.revenuePerShare)}</td>
-                <td>{formatNumber(stock.fcf)}</td>
-                <td>{formatNumber(stock.fcfToMarketCap)}</td>
-                <td>{formatNumber(stock.fcfPerShare)}</td>
+                <td>${formatNumber(stock.revenuePerShare)}</td>
+                <td>${formatNumber(stock.fcf)}</td>
+                <td>${formatNumber(stock.fcfToMarketCap)}</td>
+                <td>${formatNumber(stock.fcfPerShare)}</td>
                 <td>{formatNumber(stock.fcfToEV)}</td>
-                <td>{formatNumber(stock.ocf)}</td>
+                <td>${formatNumber(stock.ocf)}</td>
                 <td>{formatPercentage(stock.ocfToRevenueRatio)}</td>
-                <td>{formatNumber(stock.ocfToMarketCap)}</td>
-                <td>{formatNumber(stock.ocfPerShare)}</td>
+                <td>${formatNumber(stock.ocfToMarketCap)}</td>
+                <td>${formatNumber(stock.ocfPerShare)}</td>
                 <td>{formatNumber(stock.ocfToEV)}</td>
                 <td>
                   <button onClick={() => handleDelete(stock.id)}>Delete</button>
