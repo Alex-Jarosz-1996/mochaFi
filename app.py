@@ -53,6 +53,9 @@ class StockModel(db.Model):
 # class TradeBot(db.Model):
 #     __tablename__ = "trade_bot"
 
+# Deleting the db before it is created
+if os.path.exists(db_path):
+    os.remove(db_path)
 
 # Create the database tables
 with app.app_context():
