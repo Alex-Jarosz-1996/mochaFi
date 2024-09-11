@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { StyledContainer } from '../styles';
+
+const metricCategories = {
+  "Basic Info": ["code", "country", "price", "marketCap", "numSharesAvail"],
+  "Price Metrics": ["yearlyLowPrice", "yearlyHighPrice", "fiftyDayMA", "twoHundredDayMA"],
+  "Valuation Ratios": ["acquirersMultiple", "currentRatio", "enterpriseValue", "eps", "evToEBITDA", "evToRev", "peRatioTrail", "peRatioForward", "priceToSales", "priceToBook"],
+  "Dividend Info": ["dividendYield", "dividendRate", "exDivDate", "payoutRatio"],
+  "Financial Metrics": ["bookValPerShare", "cash", "cashPerShare", "cashToMarketCap", "cashToDebt", "debt", "debtToMarketCap", "debtToEquityRatio", "returnOnAssets", "returnOnEquity"],
+  "Income Statement": ["ebitda", "ebitdaPerShare", "earningsGrowth", "grossProfit", "grossProfitPerShare", "netIncome", "netIncomePerShare", "operatingMargin", "profitMargin", "revenue", "revenueGrowth", "revenuePerShare"],
+  "Cash Flow": ["fcf", "fcfToMarketCap", "fcfPerShare", "fcfToEV", "ocf", "ocfToRevenueRatio", "ocfToMarketCap", "ocfPerShare", "ocfToEV"]
+};
 
 const Stats = () => {
   const [stock, setStock] = useState('');
   const [country, setCountry] = useState('');
   const [countries] = useState(['AUS', 'US']);
   const [stocks, setStocks] = useState([]);
+  const [visibleMetrics, setVisibleMetrics] = useState(() => {
+    const allMetrics = Object.values(metricCategories).flat();
+    return allMetrics.reduce((acc, metric) => ({
+      ...acc,
+      [metric]: ['code', 'country', 'price'].includes(metric)
+    }), {});
+  });
 
   useEffect(() => {
     fetchStocks();
@@ -41,15 +59,34 @@ const Stats = () => {
     }
   };
 
+  const toggleMetric = (metric) => {
+    setVisibleMetrics(prev => ({...prev, [metric]: !prev[metric]}));
+  };
+
+  const toggleCategory = (category) => {
+    const categoryMetrics = metricCategories[category];
+    const areAllVisible = categoryMetrics.every(metric => visibleMetrics[metric]);
+    setVisibleMetrics(prev => {
+      const newState = {...prev};
+      categoryMetrics.forEach(metric => {
+        newState[metric] = !areAllVisible;
+      });
+      return newState;
+    });
+  };
+
   const formatNumber = (num) => {
-    return num ? num.toLocaleString(undefined, { maximumFractionDigits: 2 }) : 'N/A';
+    if (num === null || num === undefined) return 'N/A';
+    return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
   };
 
   const formatPercentage = (num) => {
-    return num ? `${(num * 100).toFixed(2)}%` : 'N/A';
+    if (num === null || num === undefined) return 'N/A';
+    return `${(num * 100).toFixed(2)}%`;
   };
 
   return (
+    <StyledContainer>
     <div>
       <h2>Stock Selector</h2>
       <form onSubmit={handleSubmit}>
@@ -65,134 +102,87 @@ const Stats = () => {
           onChange={(e) => setCountry(e.target.value)}
           required
         >
-        <option value="">Select a country</option>
-        {countries.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
+          <option value="">Select a country</option>
+          {countries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
         <button type="submit">Add Stock</button>
       </form>
+
+      <div style={{ marginBottom: '20px' }}>
+        <h4>Toggle Metrics:</h4>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          {Object.entries(metricCategories).map(([category, metrics]) => (
+            <div key={category} style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', minWidth: '200px', flex: '1' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <input
+                  type="checkbox"
+                  id={`category-${category}`}
+                  checked={metrics.every(metric => visibleMetrics[metric])}
+                  onChange={() => toggleCategory(category)}
+                  style={{ marginRight: '5px' }}
+                />
+                <label htmlFor={`category-${category}`} style={{ fontSize: '1em', fontWeight: 'bold', cursor: 'pointer' }}>
+                  {category}
+                </label>
+              </div>
+              <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                {metrics.map(metric => (
+                  <div key={metric} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                    <input
+                      type="checkbox"
+                      id={metric}
+                      checked={visibleMetrics[metric]}
+                      onChange={() => toggleMetric(metric)}
+                      style={{ marginRight: '5px' }}
+                    />
+                    <label htmlFor={metric} style={{ fontSize: '0.9em', cursor: 'pointer' }}>
+                      {metric.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <h3>Saved Stocks</h3>
+
       <div style={{overflowX: 'auto'}}>
         <table>
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Country</th>
-              <th>Price</th>
-              <th>Market Cap</th>
-              <th>Shares Available</th>
-              <th>Yearly Low</th>
-              <th>Yearly High</th>
-              <th>50 Day MA</th>
-              <th>200 Day MA</th>
-              <th>Acquirers Multiple</th>
-              <th>Current Ratio</th>
-              <th>Enterprise Value</th>
-              <th>EPS</th>
-              <th>EV/EBITDA</th>
-              <th>EV/Rev</th>
-              <th>P/E (Trail)</th>
-              <th>P/E (Forward)</th>
-              <th>Price to Sales</th>
-              <th>Price to Book</th>
-              <th>Dividend Yield</th>
-              <th>Dividend Rate</th>
-              <th>Ex-Dividend Date</th>
-              <th>Payout Ratio</th>
-              <th>Book Value per Share</th>
-              <th>Cash</th>
-              <th>Casper per Share</th>
-              <th>Cash to Market Cap</th>
-              <th>Cash to Debt</th>
-              <th>Debt</th>
-              <th>Debt to Market Cap</th>
-              <th>Debt to Equity Ratio</th>
-              <th>Return on Assets</th>
-              <th>Return on Equity</th>
-              <th>EBITDA</th>
-              <th>EBITDA per Share</th>
-              <th>Earnings Growth</th>
-              <th>Gross Profit</th>
-              <th>Gross Profit per Share</th>
-              <th>Net Income</th>
-              <th>Net Income per Share</th>
-              <th>Operating Margin</th>
-              <th>Profit Margin</th>
-              <th>Revenue</th>
-              <th>Revenue Growth</th>
-              <th>Revenue per Share</th>
-              <th>Free Cash Flow</th>
-              <th>Free Cash Flow to Market Cap</th>
-              <th>Free Cash Flow per Share</th>
-              <th>Free Cash Flow to Enterprise Value</th>
-              <th>Operating Cash Flow</th>
-              <th>Operating Cash Flow to Revenue Ratio</th>
-              <th>Operating Cash Flow to Market Cap</th>
-              <th>Operating Cash Flow per Share</th>
-              <th>Operating Cash Flow to Enterprise Value</th>
+              {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
+                isVisible && <th key={metric}>{metric.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</th>
+              ))}
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {stocks.map((stock) => (
               <tr key={stock.id}>
-                <td>{stock.code}</td>
-                <td>{stock.country}</td>
-                <td>${formatNumber(stock.price)}</td>
-                <td>${formatNumber(stock.marketCap)}</td>
-                <td>{formatNumber(stock.numSharesAvail)}</td>
-                <td>${formatNumber(stock.yearlyLowPrice)}</td>
-                <td>${formatNumber(stock.yearlyHighPrice)}</td>
-                <td>${formatNumber(stock.fiftyDayMA)}</td>
-                <td>${formatNumber(stock.twoHundredDayMA)}</td>
-                <td>{formatNumber(stock.acquirersMultiple)}</td>
-                <td>{formatNumber(stock.currentRatio)}</td>
-                <td>${formatNumber(stock.enterpriseValue)}</td>
-                <td>${formatNumber(stock.eps)}</td>
-                <td>{formatNumber(stock.evToEBITDA)}</td>
-                <td>{formatNumber(stock.evToRev)}</td>
-                <td>{formatPercentage(stock.peRatioTrail)}</td>
-                <td>{formatPercentage(stock.peRatioForward)}</td>
-                <td>{formatNumber(stock.priceToSales)}</td>
-                <td>{formatNumber(stock.priceToBook)}</td>
-                <td>{formatPercentage(stock.dividendYield)}</td>
-                <td>${formatNumber(stock.dividendRate)}</td>
-                <td>{stock.exDivDate || 'N/A'}</td>
-                <td>{formatPercentage(stock.payoutRatio)}</td>
-                <td>${formatNumber(stock.bookValPerShare)}</td>
-                <td>${formatNumber(stock.cash)}</td>
-                <td>${formatNumber(stock.cashPerShare)}</td>
-                <td>${formatPercentage(stock.cashToMarketCap)}</td>
-                <td>{formatNumber(stock.cashToDebt)}</td>
-                <td>${formatNumber(stock.debt)}</td>
-                <td>{formatPercentage(stock.debtToMarketCap)}</td>
-                <td>{formatPercentage(stock.debtToEquityRatio)}</td>
-                <td>{formatPercentage(stock.returnOnAssets)}</td>
-                <td>{formatPercentage(stock.returnOnEquity)}</td>
-                <td>${formatNumber(stock.ebitda)}</td>
-                <td>${formatNumber(stock.ebitdaPerShare)}</td>
-                <td>{formatPercentage(stock.earningsGrowth)}</td>
-                <td>${formatNumber(stock.grossProfit)}</td>
-                <td>${formatNumber(stock.grossProfitPerShare)}</td>
-                <td>${formatNumber(stock.netIncome)}</td>
-                <td>${formatNumber(stock.netIncomePerShare)}</td>
-                <td>${formatPercentage(stock.operatingMargin)}</td>
-                <td>${formatPercentage(stock.profitMargin)}</td>
-                <td>${formatNumber(stock.revenue)}</td>
-                <td>{formatPercentage(stock.revenueGrowth)}</td>
-                <td>${formatNumber(stock.revenuePerShare)}</td>
-                <td>${formatNumber(stock.fcf)}</td>
-                <td>${formatNumber(stock.fcfToMarketCap)}</td>
-                <td>${formatNumber(stock.fcfPerShare)}</td>
-                <td>{formatNumber(stock.fcfToEV)}</td>
-                <td>${formatNumber(stock.ocf)}</td>
-                <td>{formatPercentage(stock.ocfToRevenueRatio)}</td>
-                <td>${formatNumber(stock.ocfToMarketCap)}</td>
-                <td>${formatNumber(stock.ocfPerShare)}</td>
-                <td>{formatNumber(stock.ocfToEV)}</td>
+                {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
+                  isVisible && (
+                  <td key={metric}>
+                    {metric === 'exDivDate' ? (stock[metric] || 'N/A') :
+                    ['dividendYield', 'payoutRatio', 'cashToMarketCap', 'debtToMarketCap', 
+                      'debtToEquityRatio', 'returnOnAssets', 'returnOnEquity', 'earningsGrowth', 
+                      'operatingMargin', 'profitMargin', 'revenueGrowth', 'ocfToRevenueRatio'].includes(metric) 
+                      ? formatPercentage(stock[metric]) :
+                    ['price', 'marketCap', 'yearlyLowPrice', 'yearlyHighPrice', 'fiftyDayMA', 
+                      'twoHundredDayMA', 'enterpriseValue', 'eps', 'dividendRate', 'bookValPerShare', 
+                      'cash', 'cashPerShare', 'debt', 'ebitda', 'ebitdaPerShare', 'grossProfit', 
+                      'grossProfitPerShare', 'netIncome', 'netIncomePerShare', 'revenue', 'revenuePerShare', 
+                      'fcf', 'fcfToMarketCap', 'fcfPerShare', 'ocf', 'ocfToMarketCap', 'ocfPerShare'].includes(metric) 
+                      ? (stock[metric] !== null && stock[metric] !== undefined ? `$${formatNumber(stock[metric])}` : 'N/A') :
+                    formatNumber(stock[metric])}
+                  </td>
+                  )
+                ))}
                 <td>
                   <button onClick={() => handleDelete(stock.id)}>Delete</button>
                 </td>
@@ -202,6 +192,8 @@ const Stats = () => {
         </table>
       </div>
     </div>
+    </StyledContainer>
+    
   );
 };
 
