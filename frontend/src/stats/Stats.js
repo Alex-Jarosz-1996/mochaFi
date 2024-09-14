@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Button,
+  ButtonGroup, 
   CategoryBox,
   CategoryContainer,
   CategoryTitle,
+  DeleteAllButton,
   DeleteButton,
   Form, 
   Input,
@@ -130,6 +132,15 @@ const Stats = () => {
       fetchStocks();
     } catch (error) {
       console.error('Error deleting stock:', error);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      await axios.delete('http://localhost:5000/stocks');
+      fetchStocks();
+    } catch (error) {
+      console.error('Error deleting all stocks:', error);
     }
   };
 
@@ -269,6 +280,10 @@ const Stats = () => {
             ))}
           </CategoryContainer>
         </ToggleSection>
+
+        <ButtonGroup>
+          <DeleteAllButton onClick={handleDeleteAll}>Delete All Stocks</DeleteAllButton>
+        </ButtonGroup>
 
         <Title>Saved Stocks</Title>
 

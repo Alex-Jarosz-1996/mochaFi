@@ -137,3 +137,18 @@ export const DeleteButton = styled.button`
     background-color: #c0392b;
   }
 `;
+
+export const DeleteAllButton = styled(Button)`
+  background-color: #e74c3c;
+  margin-left: 10px;
+
+  &:hover {
+    background-color: #c0392b;
+  }
+`;
+
+export const ButtonGroup = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+`;

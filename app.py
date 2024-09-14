@@ -328,5 +328,13 @@ def delete_stock(stock_id):
         return jsonify({"error": "Error deleting stock"}), 500
 
 
+@app.route('/stocks', methods=['DELETE'])
+def delete_all_stocks():
+    db.session.query(StockModel).delete()
+    db.session.commit()
+
+    return jsonify({"message": "Deleted all stocks successfully"}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
