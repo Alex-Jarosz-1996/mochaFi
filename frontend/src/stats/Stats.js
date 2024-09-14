@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { StyledContainer } from '../styles';
+import { 
+  Button,
+  CategoryBox,
+  CategoryContainer,
+  CategoryTitle,
+  DeleteButton,
+  Form, 
+  Input,
+  MetricLabel, 
+  Select, 
+  Table,
+  Td,
+  Th,
+  Title,
+  ToggleTitle,
+  ToggleSection,
+  StyledContainer 
+} from '../styles';
 
 const metricCategories = {
   "Basic Info": ["code", "country", "price", "marketCap", "numSharesAvail"],
@@ -10,6 +27,63 @@ const metricCategories = {
   "Financial Metrics": ["bookValPerShare", "cash", "cashPerShare", "cashToMarketCap", "cashToDebt", "debt", "debtToMarketCap", "debtToEquityRatio", "returnOnAssets", "returnOnEquity"],
   "Income Statement": ["ebitda", "ebitdaPerShare", "earningsGrowth", "grossProfit", "grossProfitPerShare", "netIncome", "netIncomePerShare", "operatingMargin", "profitMargin", "revenue", "revenueGrowth", "revenuePerShare"],
   "Cash Flow": ["fcf", "fcfToMarketCap", "fcfPerShare", "fcfToEV", "ocf", "ocfToRevenueRatio", "ocfToMarketCap", "ocfPerShare", "ocfToEV"]
+};
+
+const metricDisplayNames = {
+  code: "Code",
+  country: "Country",
+  price: "Price",
+  marketCap: "Market Cap",
+  numSharesAvail: "Shares Available",
+  yearlyLowPrice: "Yearly Low",
+  yearlyHighPrice: "Yearly High",
+  fiftyDayMA: "50 Day MA",
+  twoHundredDayMA: "200 Day MA",
+  acquirersMultiple: "Acquirers Multiple",
+  currentRatio: "Current Ratio",
+  enterpriseValue: "Enterprise Value",
+  eps: "EPS",
+  evToEBITDA: "EV/EBITDA",
+  evToRev: "EV/Revenue",
+  peRatioTrail: "P/E (Trailing)",
+  peRatioForward: "P/E (Forward)",
+  priceToSales: "Price to Sales",
+  priceToBook: "Price to Book",
+  dividendYield: "Dividend Yield",
+  dividendRate: "Dividend Rate",
+  exDivDate: "Ex-Dividend Date",
+  payoutRatio: "Payout Ratio",
+  bookValPerShare: "Book Value per Share",
+  cash: "Cash",
+  cashPerShare: "Cash per Share",
+  cashToMarketCap: "Cash to Market Cap",
+  cashToDebt: "Cash to Debt",
+  debt: "Debt",
+  debtToMarketCap: "Debt to Market Cap",
+  debtToEquityRatio: "Debt to Equity",
+  returnOnAssets: "Return on Assets",
+  returnOnEquity: "Return on Equity",
+  ebitda: "EBITDA",
+  ebitdaPerShare: "EBITDA per Share",
+  earningsGrowth: "Earnings Growth",
+  grossProfit: "Gross Profit",
+  grossProfitPerShare: "Gross Profit per Share",
+  netIncome: "Net Income",
+  netIncomePerShare: "Net Income per Share",
+  operatingMargin: "Operating Margin",
+  profitMargin: "Profit Margin",
+  revenue: "Revenue",
+  revenueGrowth: "Revenue Growth",
+  revenuePerShare: "Revenue per Share",
+  fcf: "Free Cash Flow",
+  fcfToMarketCap: "FCF to Market Cap",
+  fcfPerShare: "FCF per Share",
+  fcfToEV: "FCF to EV",
+  ocf: "Operating Cash Flow",
+  ocfToRevenueRatio: "OCF to Revenue",
+  ocfToMarketCap: "OCF to Market Cap",
+  ocfPerShare: "OCF per Share",
+  ocfToEV: "OCF to EV",
 };
 
 const Stats = () => {
@@ -75,125 +149,160 @@ const Stats = () => {
     });
   };
 
-  const formatNumber = (num) => {
-    if (num === null || num === undefined) return 'N/A';
-    return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
-  };
+  const formatValue = (metric, value) => {
+    if (value === null || value === undefined) return 'N/A';
 
-  const formatPercentage = (num) => {
-    if (num === null || num === undefined) return 'N/A';
-    return `${(num * 100).toFixed(2)}%`;
+    switch(metric) {
+      case 'code':
+      case 'country':
+        return value.toLowerCase() === 'aus' ? 'Australia' :
+               value.toLowerCase() === 'us' ? 'United States' :
+               value;
+      case 'exDivDate':
+        return value || 'N/A';
+      case 'price':
+      case 'yearlyLowPrice':
+      case 'yearlyHighPrice':
+      case 'fiftyDayMA':
+      case 'twoHundredDayMA':
+      case 'eps':
+      case 'dividendRate':
+      case 'bookValPerShare':
+      case 'cashPerShare':
+      case 'ebitdaPerShare':
+      case 'grossProfitPerShare':
+      case 'netIncomePerShare':
+      case 'revenuePerShare':
+      case 'fcfPerShare':
+      case 'ocfPerShare':
+        return `$${value.toFixed(2)}`;
+      case 'marketCap':
+      case 'enterpriseValue':
+      case 'cash':
+      case 'debt':
+      case 'ebitda':
+      case 'grossProfit':
+      case 'netIncome':
+      case 'revenue':
+      case 'fcf':
+      case 'ocf':
+        return `$${(value / 1e9).toFixed(2)}B`;
+      case 'numSharesAvail':
+        return `${(value / 1e6).toFixed(2)}M`;
+      case 'dividendYield':
+      case 'payoutRatio':
+      case 'cashToMarketCap':
+      case 'debtToMarketCap':
+      case 'returnOnAssets':
+      case 'returnOnEquity':
+      case 'earningsGrowth':
+      case 'operatingMargin':
+      case 'profitMargin':
+      case 'revenueGrowth':
+      case 'ocfToRevenueRatio':
+        return `${(value * 100).toFixed(2)}%`;
+      default:
+        return value.toFixed(2);
+    }
   };
 
   return (
     <StyledContainer>
-    <div>
-      <h2>Stock Selector</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          placeholder="Enter stock symbol"
-          required
-        />
-        <select
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          required
-        >
-          <option value="">Select a country</option>
-          {countries.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <button type="submit">Add Stock</button>
-      </form>
+      <Title>Stock Statistics Dashboard</Title>
+        <Form onSubmit={handleSubmit}>
+          <Input
+            type="text"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            placeholder="Enter stock symbol"
+            required
+          />
+          <Select
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            required
+          >
+            <option value="">Select a country</option>
+            {countries.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
+          <Button type="submit">Add Stock</Button>
+        </Form>
 
-      <div style={{ marginBottom: '20px' }}>
-        <h4>Toggle Metrics:</h4>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {Object.entries(metricCategories).map(([category, metrics]) => (
-            <div key={category} style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', minWidth: '200px', flex: '1' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <input
-                  type="checkbox"
-                  id={`category-${category}`}
-                  checked={metrics.every(metric => visibleMetrics[metric])}
-                  onChange={() => toggleCategory(category)}
-                  style={{ marginRight: '5px' }}
-                />
-                <label htmlFor={`category-${category}`} style={{ fontSize: '1em', fontWeight: 'bold', cursor: 'pointer' }}>
-                  {category}
-                </label>
-              </div>
-              <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                {metrics.map(metric => (
-                  <div key={metric} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    <input
-                      type="checkbox"
-                      id={metric}
-                      checked={visibleMetrics[metric]}
-                      onChange={() => toggleMetric(metric)}
-                      style={{ marginRight: '5px' }}
-                    />
-                    <label htmlFor={metric} style={{ fontSize: '0.9em', cursor: 'pointer' }}>
-                      {metric.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        <ToggleSection>
+          <ToggleTitle>Toggle Metrics:</ToggleTitle>
+          <CategoryContainer>
+            {Object.entries(metricCategories).map(([category, metrics]) => (
+              <CategoryBox key={category}>
+                <CategoryTitle>
+                  <input
+                    type="checkbox"
+                    id={`category-${category}`}
+                    checked={metrics.every(metric => visibleMetrics[metric])}
+                    onChange={() => toggleCategory(category)}
+                    style={{ marginRight: '5px' }}
+                  />
+                  <label htmlFor={`category-${category}`} style={{ fontSize: '1em', fontWeight: 'bold', cursor: 'pointer' }}>
+                    {category}
+                  </label>
+                </CategoryTitle>
+                <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                  {metrics.map(metric => (
+                    <MetricLabel key={metric}>
+                      <input
+                        type="checkbox"
+                        id={metric}
+                        checked={visibleMetrics[metric]}
+                        onChange={() => toggleMetric(metric)}
+                        style={{ marginRight: '5px' }}
+                      />
+                      <label htmlFor={metric} style={{ fontSize: '0.9em', cursor: 'pointer' }}>
+                        {metricDisplayNames[metric]}
+                      </label>
+                    </MetricLabel>
+                  ))}
+                </div>
+              </CategoryBox>
+            ))}
+          </CategoryContainer>
+        </ToggleSection>
 
-      <h3>Saved Stocks</h3>
+        <Title>Saved Stocks</Title>
 
-      <div style={{overflowX: 'auto'}}>
-        <table>
-          <thead>
-            <tr>
-              {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
-                isVisible && <th key={metric}>{metric.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</th>
-              ))}
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stocks.map((stock) => (
-              <tr key={stock.id}>
+        <div style={{overflowX: 'auto'}}>
+          <Table>
+            <thead>
+              <tr>
                 {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
                   isVisible && (
-                  <td key={metric}>
-                    {metric === 'exDivDate' ? (stock[metric] || 'N/A') :
-                    ['dividendYield', 'payoutRatio', 'cashToMarketCap', 'debtToMarketCap', 
-                      'debtToEquityRatio', 'returnOnAssets', 'returnOnEquity', 'earningsGrowth', 
-                      'operatingMargin', 'profitMargin', 'revenueGrowth', 'ocfToRevenueRatio'].includes(metric) 
-                      ? formatPercentage(stock[metric]) :
-                    ['price', 'marketCap', 'yearlyLowPrice', 'yearlyHighPrice', 'fiftyDayMA', 
-                      'twoHundredDayMA', 'enterpriseValue', 'eps', 'dividendRate', 'bookValPerShare', 
-                      'cash', 'cashPerShare', 'debt', 'ebitda', 'ebitdaPerShare', 'grossProfit', 
-                      'grossProfitPerShare', 'netIncome', 'netIncomePerShare', 'revenue', 'revenuePerShare', 
-                      'fcf', 'fcfToMarketCap', 'fcfPerShare', 'ocf', 'ocfToMarketCap', 'ocfPerShare'].includes(metric) 
-                      ? (stock[metric] !== null && stock[metric] !== undefined ? `$${formatNumber(stock[metric])}` : 'N/A') :
-                    formatNumber(stock[metric])}
-                  </td>
+                    <Th key={metric}>{metricDisplayNames[metric]}</Th>
                   )
                 ))}
-                <td>
-                  <button onClick={() => handleDelete(stock.id)}>Delete</button>
-                </td>
+                <Th>Action</Th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {stocks.map((stock) => (
+                <tr key={stock.id}>
+                  {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
+                    isVisible && (
+                      <Td key={metric}>
+                        {formatValue(metric, stock[metric])}
+                      </Td>
+                    )
+                  ))}
+                  <Td>
+                    <DeleteButton onClick={() => handleDelete(stock.id)}>Delete</DeleteButton>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
     </StyledContainer>
-    
   );
 };
 
