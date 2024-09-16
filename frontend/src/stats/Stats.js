@@ -92,6 +92,8 @@ const Stats = () => {
   const [country, setCountry] = useState('');
   const [countries] = useState(['AUS', 'US']);
   const [stocks, setStocks] = useState([]);
+  const [sortColumn, setSortColumn] = useState('');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [visibleMetrics, setVisibleMetrics] = useState(() => {
     const allMetrics = Object.values(metricCategories).flat();
     return allMetrics.reduce((acc, metric) => ({
@@ -216,6 +218,23 @@ const Stats = () => {
     }
   };
 
+  const handleSort = (column) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedStocks = [...stocks].sort((a, b) => {
+    if (sortColumn) {
+      if (a[sortColumn] < b[sortColumn]) return sortDirection === 'asc' ? -1 : 1;
+      if (a[sortColumn] > b[sortColumn]) return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
   return (
     <>
       <Title>Stock Statistics Dashboard</Title>
@@ -287,35 +306,40 @@ const Stats = () => {
         <Title>Saved Stocks</Title>
 
         <div style={{overflowX: 'auto'}}>
-          <Table>
-            <thead>
-              <tr>
+        <Table>
+          <thead>
+            <tr>
+              {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
+                isVisible && (
+                  <Th key={metric} onClick={() => handleSort(metric)}>
+                    {metricDisplayNames[metric]}
+                    {sortColumn === metric && (
+                      <span>{sortDirection === 'asc' ? ' ▲' : ' ▼'}</span>
+                    )}
+                  </Th>
+                )
+              ))}
+              <Th>Action</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedStocks.map((stock) => (
+              <tr key={stock.id}>
                 {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
                   isVisible && (
-                    <Th key={metric}>{metricDisplayNames[metric]}</Th>
+                    <Td key={metric}>
+                      {formatValue(metric, stock[metric])}
+                    </Td>
                   )
                 ))}
-                <Th>Action</Th>
+                <Td>
+                  <DeleteButton onClick={() => handleDelete(stock.id)}>Delete</DeleteButton>
+                </Td>
               </tr>
-            </thead>
-            <tbody>
-              {stocks.map((stock) => (
-                <tr key={stock.id}>
-                  {Object.entries(visibleMetrics).map(([metric, isVisible]) => (
-                    isVisible && (
-                      <Td key={metric}>
-                        {formatValue(metric, stock[metric])}
-                      </Td>
-                    )
-                  ))}
-                  <Td>
-                    <DeleteButton onClick={() => handleDelete(stock.id)}>Delete</DeleteButton>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     </>
   );
 };
