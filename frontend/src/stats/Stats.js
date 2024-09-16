@@ -17,8 +17,7 @@ import {
   Th,
   Title,
   ToggleTitle,
-  ToggleSection,
-  StyledContainer 
+  ToggleSection 
 } from '../styles';
 
 const metricCategories = {
@@ -218,7 +217,7 @@ const Stats = () => {
   };
 
   return (
-    <StyledContainer>
+    <>
       <Title>Stock Statistics Dashboard</Title>
         <Form onSubmit={handleSubmit}>
           <Input
@@ -317,7 +316,7 @@ const Stats = () => {
             </tbody>
           </Table>
         </div>
-    </StyledContainer>
+    </>
   );
 };
 

@@ -1,23 +1,5 @@
 import styled from 'styled-components';
 
-export const StyledBody = styled.body`
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
-export const StyledContainer = styled.div`
-  background-color: #ffffff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  margin: 0;
-  min-height: 100vh;
-  overflow-x: auto;
-`;
-
 export const Title = styled.h2`
   color: #2c3e50;
   font-size: 28px;
