@@ -59,10 +59,8 @@ const VerticalTabs = () => {
   return (
     <Box
       sx={{
-        flexGrow: 1,
-        bgcolor: 'background.paper',
         display: 'flex',
-        height: 224,
+        minHeight: '100vh',
       }}
     >
       <Tabs
@@ -71,7 +69,18 @@ const VerticalTabs = () => {
         value={value}
         onChange={handleChange}
         aria-label="Vertical tabs example"
-        sx={{ borderRight: 1, borderColor: 'divider' }}
+        sx={{ 
+          borderRight: 1, 
+          borderColor: 'divider',
+          minWidth: '120px',
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          '& .MuiTab-root': {
+            alignItems: 'flex-start',
+            textAlign: 'left',
+          }
+        }}
       >
         <Tab label="Home" />
         <Tab label="Stats" />
@@ -80,14 +89,16 @@ const VerticalTabs = () => {
         <Tab label="Trading" />
       </Tabs>
 
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="/home" element={<TabPanel value={value} index={0}><Home /></TabPanel>} />
-        <Route path="/stats" element={<TabPanel value={value} index={1}><Stats /></TabPanel>} />
-        <Route path="/chart" element={<TabPanel value={value} index={2}><Chart /></TabPanel>} />
-        <Route path="/strategy" element={<TabPanel value={value} index={3}><Strategy /></TabPanel>} />
-        <Route path="/trading" element={<TabPanel value={value} index={4}><Trading /></TabPanel>} />
-      </Routes>
+      <Box sx={{ flexGrow: 1 }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="/home" element={<TabPanel value={value} index={0}><Home /></TabPanel>} />
+          <Route path="/stats" element={<TabPanel value={value} index={1}><Stats /></TabPanel>} />
+          <Route path="/chart" element={<TabPanel value={value} index={2}><Chart /></TabPanel>} />
+          <Route path="/strategy" element={<TabPanel value={value} index={3}><Strategy /></TabPanel>} />
+          <Route path="/trading" element={<TabPanel value={value} index={4}><Trading /></TabPanel>} />
+        </Routes>
+      </Box>
     </Box>
   );
 };
