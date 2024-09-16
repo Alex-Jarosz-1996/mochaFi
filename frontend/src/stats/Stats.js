@@ -17,7 +17,8 @@ import {
   Th,
   Title,
   ToggleTitle,
-  ToggleSection 
+  ToggleSection,
+  DesktopWrapper
 } from '../styles';
 
 const metricCategories = {
@@ -236,76 +237,70 @@ const Stats = () => {
   });
 
   return (
-    <>
+    <DesktopWrapper>
       <Title>Stock Statistics Dashboard</Title>
-        <Form onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            placeholder="Enter stock symbol"
-            required
-          />
-          <Select
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            required
-          >
-            <option value="">Select a country</option>
-            {countries.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Select>
-          <Button type="submit">Add Stock</Button>
-        </Form>
+      <Form onSubmit={handleSubmit}>
+        <Input
+          type="text"
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
+          placeholder="Enter stock symbol"
+          required
+        />
+        <Select
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          required
+        >
+          <option value="">Select country</option>
+          {countries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
+        <Button type="submit">Add Stock</Button>
+      </Form>
 
-        <ToggleSection>
-          <ToggleTitle>Toggle Metrics:</ToggleTitle>
-          <CategoryContainer>
-            {Object.entries(metricCategories).map(([category, metrics]) => (
-              <CategoryBox key={category}>
-                <CategoryTitle>
-                  <input
-                    type="checkbox"
-                    id={`category-${category}`}
-                    checked={metrics.every(metric => visibleMetrics[metric])}
-                    onChange={() => toggleCategory(category)}
-                    style={{ marginRight: '5px' }}
-                  />
-                  <label htmlFor={`category-${category}`} style={{ fontSize: '1em', fontWeight: 'bold', cursor: 'pointer' }}>
-                    {category}
-                  </label>
-                </CategoryTitle>
-                <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                  {metrics.map(metric => (
-                    <MetricLabel key={metric}>
-                      <input
-                        type="checkbox"
-                        id={metric}
-                        checked={visibleMetrics[metric]}
-                        onChange={() => toggleMetric(metric)}
-                        style={{ marginRight: '5px' }}
-                      />
-                      <label htmlFor={metric} style={{ fontSize: '0.9em', cursor: 'pointer' }}>
-                        {metricDisplayNames[metric]}
-                      </label>
-                    </MetricLabel>
-                  ))}
-                </div>
-              </CategoryBox>
-            ))}
-          </CategoryContainer>
-        </ToggleSection>
+      <ToggleSection>
+        <ToggleTitle>Toggle Metrics:</ToggleTitle>
+        <CategoryContainer>
+          {Object.entries(metricCategories).map(([category, metrics]) => (
+            <CategoryBox key={category}>
+              <CategoryTitle>
+                <input
+                  type="checkbox"
+                  id={`category-${category}`}
+                  checked={metrics.every(metric => visibleMetrics[metric])}
+                  onChange={() => toggleCategory(category)}
+                />
+                <label htmlFor={`category-${category}`}>{category}</label>
+              </CategoryTitle>
+              <div>
+                {metrics.map(metric => (
+                  <MetricLabel key={metric}>
+                    <input
+                      type="checkbox"
+                      id={metric}
+                      checked={visibleMetrics[metric]}
+                      onChange={() => toggleMetric(metric)}
+                    />
+                    <label htmlFor={metric}>{metricDisplayNames[metric]}</label>
+                  </MetricLabel>
+                ))}
+              </div>
+            </CategoryBox>
+          ))}
+        </CategoryContainer>
+      </ToggleSection>
 
-        <ButtonGroup>
-          <DeleteAllButton onClick={handleDeleteAll}>Delete All Stocks</DeleteAllButton>
-        </ButtonGroup>
+      <ButtonGroup>
+        <DeleteAllButton onClick={handleDeleteAll}>Delete All Stocks</DeleteAllButton>
+      </ButtonGroup>
 
-        <Title>Saved Stocks</Title>
+      <Title>Saved Stocks</Title>
 
-        <div style={{overflowX: 'auto'}}>
+      <div style={{overflowX: 'auto', maxHeight: '600px'}}>
         <Table>
           <thead>
             <tr>
@@ -340,7 +335,7 @@ const Stats = () => {
           </tbody>
         </Table>
       </div>
-    </>
+    </DesktopWrapper>
   );
 };
 
