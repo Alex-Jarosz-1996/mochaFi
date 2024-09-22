@@ -162,11 +162,11 @@ const Stats = () => {
     });
   };
 
-  const formatValue_MC = (value) => {
+  const formatValue_eq_6 = (value) => {
     const absValue = Math.abs(value);
     const numDigits = Math.floor(Math.log10(absValue)) + 1;
 
-    if (numDigits === 6) {
+    if (numDigits >= 6) {
       return `$${(value * 1e-3).toFixed(2)}B`;
     } else if (6 < numDigits <= 3) {
       return `$${(value).toFixed(2)}M`;
@@ -186,44 +186,26 @@ const Stats = () => {
     }
   };
 
-  const formatValue_EV = (value) => {
-    const absValue = Math.abs(value);
-    const numDigits = Math.floor(Math.log10(absValue)) + 1;
-
-    if (numDigits === 6) {
-      return `$${(value * 1e-3).toFixed(2)}B`;
-    } else if (6 < numDigits <= 3) {
-      return `$${(value).toFixed(2)}M`;
-    } else {
-      return `$${(value).toFixed(2)}k`;
-    }
-  };
-
-  const formatValue_cash_debt = (value) => {
-    const absValue = Math.abs(value);
-    const numDigits = Math.floor(Math.log10(absValue)) + 1;
-
-    if (numDigits === 6) {
-      return `$${(value * 1e-3).toFixed(2)}B`;
-    } else if (6 < numDigits <= 3) {
-      return `$${(value).toFixed(2)}M`;
-    } else {
-      return `$${(value).toFixed(2)}k`;
-    }
-  };
-
   const formatValue_gt_4 = (value) => {
     const absValue = Math.abs(value);
     const numDigits = Math.floor(Math.log10(absValue)) + 1;
 
     if (numDigits >= 4) {
-      return `$${(value * 1e-3).toFixed(2)}B`;
+      return `${(value * 1e-3).toFixed(2)}B`;
     } else if (4 < numDigits <= 1) {
-      return `$${(value).toFixed(2)}M`;
+      return `${(value).toFixed(2)}M`;
     } else {
-      return `$${(value).toFixed(2)}k`;
+      return `${(value).toFixed(2)}k`;
     }
   };
+
+  const return_value = (value) => {
+    return `${value}`;
+  };
+
+  const convert_to_pct = (value)=> {
+    return `${(value * 100).toFixed(2)}`;
+  }
 
   const formatValue = (metric, value) => {
     if (value === null || value === undefined) return 'N/A';
@@ -254,44 +236,47 @@ const Stats = () => {
       case 'ocfPerShare':
         return `$${value.toFixed(2)}`;
       case 'marketCap':
-        return formatValue_MC(value);
+        return formatValue_eq_6(value);
       case 'enterpriseValue':
-        return formatValue_EV(value);
+        return formatValue_eq_6(value);
       case 'cash':
-        return formatValue_cash_debt(value);
+        return formatValue_gt_4(value);
       case 'debt':
-        return formatValue_cash_debt(value);
+        return formatValue_gt_4(value);
       case 'ebitda':
       case 'grossProfit':
       case 'netIncome':
-        return formatValue_gt_4(value);
+        return `$${formatValue_gt_4(value)}`;
       case 'revenue':
-        return formatValue_gt_4(value);
+        return `$${formatValue_gt_4(value)}`;
       case 'fcf':
+        return `$${formatValue_gt_4(value)}`;
       case 'ocf':
-        return `$${(value / 1e9).toFixed(2)}B`;
+        return `$${formatValue_gt_4(value)}`;
       case 'numSharesAvail':
         return formatValue_NSA(value);
       case 'dividendYield':
-        return `${value}%`;
+        return `${return_value(value)}%`;
       case 'payoutRatio':
-        return `${value}%`;
+        return `${return_value(value)}%`;
       case 'cashToMarketCap':
+        return `${convert_to_pct(value)}%`;
       case 'debtToMarketCap':
+        return `${convert_to_pct(value)}%`;
       case 'returnOnAssets':
-        return `${value}%`
+        return `${return_value(value)}%`;
       case 'returnOnEquity':
-        return `${value}%`
+        return `${return_value(value)}%`;
       case 'earningsGrowth':
-        return `${value}%`
+        return `${return_value(value)}%`;
       case 'operatingMargin':
-        return `${value}%`
+        return `${return_value(value)}%`;
       case 'profitMargin':
-        return `${value}%`
+        return `${return_value(value)}%`;
       case 'revenueGrowth':
-        return `${value}%`
+        return `${return_value(value)}%`;
       case 'ocfToRevenueRatio':
-        return `${(value * 100).toFixed(2)}%`;
+        return `${convert_to_pct(value)}%`;
       default:
         return value.toFixed(2);
     }

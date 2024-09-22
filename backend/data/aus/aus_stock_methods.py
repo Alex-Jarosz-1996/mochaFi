@@ -719,8 +719,8 @@ def getNetIncomeMarginRatio(yfData):
     Ex: net income / net revenue = 5
     """
     try:
-        ni = getNetIncomePerShare(yfData)
-        rev = getRevenuePerShare(yfData)
+        ni = getNetIncome(yfData)
+        rev = getRevenue(yfData)
 
         if any(i is None for i in [ni, rev]):
             return None
@@ -834,8 +834,8 @@ def getOCF_toRevenueRatio(yfData):
     ex: FCF / Revenue = 5
     """
     try:
-        ocf = getOperatingCashFlowPerShare(yfData)
-        rev = getRevenuePerShare(yfData)
+        ocf = getOperatingCashFlow(yfData)
+        rev = getRevenue(yfData)
 
         if any(i is None for i in [ocf, rev]):
             return None
