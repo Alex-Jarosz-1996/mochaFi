@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 
 
 def getYahooFinanceStockURL(stockTicker):
@@ -25,31 +25,43 @@ def yahooFinanceData(stockTicker):
 
     try:
         stockURL = getYahooFinanceStockURL(stockTicker)
-    except Exception as e:
-        print(f"error in yahooFinanceData(): {stockTicker}")
-        print(e)
-        return None
-    else:
+
         r = requests.get(
             stockURL,
             headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             },
         )
-        return pd.read_html(r.text)
-
-
-def marketWatchData(stockTicker):
-    """
-    Returns all stock data as soup from Market Watch Website
-    """
-
-    try:
-        stockURL = getMarketWatchStockURL(stockTicker)
     except Exception as e:
         print(f"error in yahooFinanceData(): {stockTicker}")
         print(e)
         return None
     else:
-        requestsPage = requests.get(stockURL)
-        return BeautifulSoup(requestsPage.content, "html.parser")
+        return pd.read_html(r.text)
+
+
+def yahooFinancePriceData(stockTicker):
+    """
+    Returns html elements containing price data.
+    """
+
+    try:
+        stockURL = getYahooFinanceStockURL(stockTicker)
+
+        response = requests.get(
+            url=stockURL,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            },
+        )
+
+        html_content = response.text
+        soup = bs(html_content, 'html.parser')
+        element = soup.find('fin-streamer', {'data-test': 'qsp-price'})
+
+    except Exception as e:
+        print(f"error in yahooFinancePriceData(): {stockTicker}")
+        print(e)
+        return None
+    else:
+        return element['value']

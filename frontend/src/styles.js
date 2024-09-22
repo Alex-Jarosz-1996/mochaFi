@@ -14,19 +14,19 @@ export const Form = styled.form`
 `;
 
 export const Input = styled.input`
-  width: 150px; // Adjust this value to your preferred width
+  width: 150px;
   padding: 10px;
 `;
 
 export const Select = styled.select`
-  width: 120px; // Adjust this value if needed
+  width: 120px;
   padding: 10px;
 `;
 
 export const Button = styled.button`
   padding: 10px 20px;
   cursor: pointer;
-  height: 40px; // Match the height of inputs for alignment
+  height: 40px;
 `;
 
 export const Table = styled.table`

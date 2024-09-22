@@ -65,7 +65,7 @@ def kmb_ScalarMultiplyFactor(val):
     elif "b" in str(valInput) or "B" in str(valInput):
         return round(float(valInput[:-1]) * pow(10, 3), 4)
     elif "k" in str(valInput) or "K" in str(valInput):
-        return round(float(valInput[:-1]) / pow(10, 3), 4)
+        return round(float(valInput[:-1]) / pow(10, -3), 4)
     else:
         return float(valInput)
 
@@ -100,13 +100,13 @@ def getNumberOfSharesOutstanding(yfData):
         return None if numSharesYF is None else kmb_ScalarMultiplyFactor(numSharesYF)
 
 
-def getPrice(mwData):
+def getPrice(yfDataPrice):
     """
     Returns share price (in $)
     ex: price = $50.0
     """
     try:
-        price = str(mwData.find_all("span", class_="value")[-1].text)
+        price = yfDataPrice
     except Exception as e:
         print("Error in getPrice() function")
         print(e)
@@ -231,14 +231,20 @@ def getEnterpriseValue(yfData):
     ex: Enterprise Value = $ 100.00 million
     """
     try:
-        evYF = str(yfData[0][1][1])
+        mc = getMarketCap(yfData)
+        cash = getCash(yfData)
+        debt = getDebt(yfData)
+
+        if any(i is None for i in (mc, cash, debt)):
+            return None
+
+        return mc + debt - cash
+    
     except Exception as e:
         print("Error in getEnterpriseValue() function")
         print(e)
         return None
-    else:
-        return None if evYF is None else kmb_ScalarMultiplyFactor(evYF)
-
+    
 
 def getPE_ratioTrailing(yfData):
     """

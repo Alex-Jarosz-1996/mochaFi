@@ -162,11 +162,75 @@ const Stats = () => {
     });
   };
 
+  const formatValue_MC = (value) => {
+    const absValue = Math.abs(value);
+    const numDigits = Math.floor(Math.log10(absValue)) + 1;
+
+    if (numDigits === 6) {
+      return `$${(value * 1e-3).toFixed(2)}B`;
+    } else if (6 < numDigits <= 3) {
+      return `$${(value).toFixed(2)}M`;
+    } else {
+      return `$${(value).toFixed(2)}k`;
+    }
+  };
+
+  const formatValue_NSA = (value) => {
+    const absValue = Math.abs(value);
+    const numDigits = Math.floor(Math.log10(absValue)) + 1;
+
+    if (numDigits === 4) {
+      return `${(value * 1e-3).toFixed(2)}B`;
+    } else {
+      return `${(value).toFixed(2)}M`;
+    }
+  };
+
+  const formatValue_EV = (value) => {
+    const absValue = Math.abs(value);
+    const numDigits = Math.floor(Math.log10(absValue)) + 1;
+
+    if (numDigits === 6) {
+      return `$${(value * 1e-3).toFixed(2)}B`;
+    } else if (6 < numDigits <= 3) {
+      return `$${(value).toFixed(2)}M`;
+    } else {
+      return `$${(value).toFixed(2)}k`;
+    }
+  };
+
+  const formatValue_cash_debt = (value) => {
+    const absValue = Math.abs(value);
+    const numDigits = Math.floor(Math.log10(absValue)) + 1;
+
+    if (numDigits === 6) {
+      return `$${(value * 1e-3).toFixed(2)}B`;
+    } else if (6 < numDigits <= 3) {
+      return `$${(value).toFixed(2)}M`;
+    } else {
+      return `$${(value).toFixed(2)}k`;
+    }
+  };
+
+  const formatValue_gt_4 = (value) => {
+    const absValue = Math.abs(value);
+    const numDigits = Math.floor(Math.log10(absValue)) + 1;
+
+    if (numDigits >= 4) {
+      return `$${(value * 1e-3).toFixed(2)}B`;
+    } else if (4 < numDigits <= 1) {
+      return `$${(value).toFixed(2)}M`;
+    } else {
+      return `$${(value).toFixed(2)}k`;
+    }
+  };
+
   const formatValue = (metric, value) => {
     if (value === null || value === undefined) return 'N/A';
 
     switch(metric) {
       case 'code':
+        return value.toUpperCase()
       case 'country':
         return value.toLowerCase() === 'aus' ? 'Australia' :
                value.toLowerCase() === 'us' ? 'United States' :
@@ -190,28 +254,42 @@ const Stats = () => {
       case 'ocfPerShare':
         return `$${value.toFixed(2)}`;
       case 'marketCap':
+        return formatValue_MC(value);
       case 'enterpriseValue':
+        return formatValue_EV(value);
       case 'cash':
+        return formatValue_cash_debt(value);
       case 'debt':
+        return formatValue_cash_debt(value);
       case 'ebitda':
       case 'grossProfit':
       case 'netIncome':
+        return formatValue_gt_4(value);
       case 'revenue':
+        return formatValue_gt_4(value);
       case 'fcf':
       case 'ocf':
         return `$${(value / 1e9).toFixed(2)}B`;
       case 'numSharesAvail':
-        return `${(value / 1e6).toFixed(2)}M`;
+        return formatValue_NSA(value);
       case 'dividendYield':
+        return `${value}%`;
       case 'payoutRatio':
+        return `${value}%`;
       case 'cashToMarketCap':
       case 'debtToMarketCap':
       case 'returnOnAssets':
+        return `${value}%`
       case 'returnOnEquity':
+        return `${value}%`
       case 'earningsGrowth':
+        return `${value}%`
       case 'operatingMargin':
+        return `${value}%`
       case 'profitMargin':
+        return `${value}%`
       case 'revenueGrowth':
+        return `${value}%`
       case 'ocfToRevenueRatio':
         return `${(value * 100).toFixed(2)}%`;
       default:

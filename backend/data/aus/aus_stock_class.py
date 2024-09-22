@@ -52,12 +52,12 @@ from backend.data.aus.aus_stock_methods import (
     getTrailingDividendRate,
     getTrailingDividendYield,
 )
-from backend.data.aus.websites import marketWatchData, yahooFinanceData
+from backend.data.aus.websites import yahooFinancePriceData, yahooFinanceData
 
 
 class StockPriceMetrics:
-    def __init__(self, mw_data, yf_data):
-        self.price = getPrice(mw_data)
+    def __init__(self, yf_data_price, yf_data):
+        self.price = getPrice(yf_data_price)
         self.marketCap = getMarketCap(yf_data)
         self.numSharesAvail = getNumberOfSharesOutstanding(yf_data)
         self.yearlyLowPrice = get52_WkLowPrice(yf_data)
@@ -139,11 +139,11 @@ class AusStockClass:
     def __init__(self, ticker: str):
         self.country = "aus"
         self.ticker = ticker
-        self.mw_data = marketWatchData(self.ticker)
+        self.yf_data_price = yahooFinancePriceData(self.ticker)
         self.yf_data = yahooFinanceData(self.ticker)
 
         # Initialize metric classes
-        self.stockPriceMetrics = StockPriceMetrics(self.mw_data, self.yf_data)
+        self.stockPriceMetrics = StockPriceMetrics(self.yf_data_price, self.yf_data)
         self.valueMetrics = ValueMetrics(self.yf_data)
         self.dividendMetrics = DividendMetrics(self.yf_data)
         self.balanceSheetMetrics = BalanceSheetMetrics(self.yf_data)
