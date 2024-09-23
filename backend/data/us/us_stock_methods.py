@@ -368,7 +368,8 @@ def getExDivdate(obj: Dict[str, Optional[Union[int, float, str]]]) -> str:
     else:
         exDivDate_tstamp = datetime.fromtimestamp(exDivDate)
         exDivDate_formatted = f"{exDivDate_tstamp.day:02d}/{exDivDate_tstamp.month:02d}/{exDivDate_tstamp.year}"
-        return str(exDivDate_formatted)
+        date_object = datetime.strptime(str(exDivDate_formatted), "%d/%m/%Y")
+        return date_object.strftime("%d %b %Y")
 
 
 def getPayoutRatio(

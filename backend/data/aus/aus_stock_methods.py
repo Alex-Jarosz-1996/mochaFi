@@ -65,7 +65,7 @@ def kmb_ScalarMultiplyFactor(val):
     elif "b" in str(valInput) or "B" in str(valInput):
         return round(float(valInput[:-1]) * pow(10, 3), 4)
     elif "k" in str(valInput) or "K" in str(valInput):
-        return round(float(valInput[:-1]) / pow(10, -3), 4)
+        return round(float(valInput[:-1]) * pow(10, -3), 4)
     else:
         return float(valInput)
 
