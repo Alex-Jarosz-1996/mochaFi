@@ -4,34 +4,7 @@ const Chart = () => {
   const [ticker, setTicker] = useState('');
   const [timePeriod, setTimePeriod] = useState('1y');
   const [timeInterval, setTimeInterval] = useState('1d');
-  const [chartData, setChartData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const backend_url = `http://localhost:5000/chart?ticker=${ticker}&time_period=${timePeriod}&time_interval=${timeInterval}`;
-
-  const fetchData = async () => {
-    setIsLoading(true); // Start loading
-    try {
-      const response = await fetch(backend_url);
-      if (response.ok) {
-        const data = await response.json();
-        setChartData(data);
-      } else {
-        console.error('Failed to fetch data.');
-        // Optionally set chartData to null or an error state here
-      }
-    } catch (error) {
-      console.error('Error while fetching data:', error);
-      // Optionally handle the error more visibly
-    } finally {
-      setIsLoading(false); // End loading regardless of outcome
-    }
-  };
-  
-  const handleEnter = (e) => {
-    fetchData();
-  };
-  
   return (
     <div>
       <div>
@@ -42,7 +15,7 @@ const Chart = () => {
           onChange={(e) => setTicker(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter")
-                handleEnter();
+                void(0)
           }}
         />
       </div>
@@ -87,9 +60,9 @@ const Chart = () => {
         </select>
       </div>
       <div>
-        <button onClick={handleEnter}>Enter</button>
+        <button>Enter</button>
       </div>
-        <div>
+        {/* <div>
           {isLoading ? (
             <div>Loading...</div>
           ) : chartData ? (
@@ -100,7 +73,7 @@ const Chart = () => {
           ) : (
             <div>No data to display</div>
           )}
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -1,10 +1,10 @@
 import yfinance as yf
-from pandas import DataFrame
+import pandas as pd
 
 
 def get_yf_stock_data(
-    ticker: str, time_period: str, time_interval: str = "1d"
-) -> DataFrame:
+    ticker: str, time_period: str = "1y", time_interval: str = "1d"
+) -> pd.DataFrame:
     """
     Retrieve stock data using Yahoo Finance API.
 
@@ -18,9 +18,17 @@ def get_yf_stock_data(
         return None
 
     try:
+        # Download data
         data = yf.download(tickers=ticker, period=time_period, interval=time_interval)
-        data = data.drop("Adj Close", axis=1).round(2)
-        return data
+        
+        # Convert to pandas DataFrame
+        df = pd.DataFrame(data)
+
+        # Round specified columns to 2 decimal places
+        columns_to_round = ['Open', 'High', 'Low', 'Close', 'Adj Close']
+        df[columns_to_round] = df[columns_to_round].round(2)
+        
+        return df
 
     except Exception as e:
         print(f"Error occured: {e}")
@@ -30,3 +38,7 @@ def get_yf_stock_data(
 def round_result(result):
     num_dp = 2
     return round(result, num_dp)
+
+if __name__ == "__main__":
+    res = get_yf_stock_data("AAPL")
+    print((res))
