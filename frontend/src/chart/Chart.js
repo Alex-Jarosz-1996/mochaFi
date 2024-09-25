@@ -62,18 +62,6 @@ const Chart = () => {
       <div>
         <button>Enter</button>
       </div>
-        {/* <div>
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : chartData ? (
-            <div>
-              <h2>Fetched Data</h2>
-              <pre>{JSON.stringify(chartData, null, 2)}</pre>
-            </div>
-          ) : (
-            <div>No data to display</div>
-          )}
-      </div> */}
     </div>
   );
 };

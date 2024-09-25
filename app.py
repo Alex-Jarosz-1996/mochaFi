@@ -2,9 +2,9 @@ import os
 
 from flask import Flask, jsonify, request
 
-# from backend import get_yf_stock_data
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 from backend.common.core import get_yf_stock_data
 from backend.data.utils.controller import StockController
@@ -88,26 +88,24 @@ class StockModel(db.Model):
         return f"<Stock {self.code}>"
 
 
-# TODO: ADD
-# class FinancialData(db.Model):
-#     __tablename__ = 'financial_data'
-#     id = db.Column(db.Integer, primary_key=True)
-#     code = db.Column(db.Integer, db.ForeignKey('stock.code'), nullable=False)
+class StockPriceHistoryModel(db.Model):
+    __tablename__ = "stock_price_history"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    open_price = db.Column(db.Float, nullable=False)
+    high_price = db.Column(db.Float, nullable=False)
+    low_price = db.Column(db.Float, nullable=False)
+    close_price = db.Column(db.Float, nullable=False)
+    adj_close_price = db.Column(db.Float, nullable=False)
+    volume = db.Column(db.BigInteger, nullable=False)
 
+    # Relationship to StockModel
+    stock = db.relationship('StockModel', backref=db.backref('price_history', lazy='dynamic'))
 
-# TODO: ADD
-# class StockChart(db.Model):
-#     __tablename__ = "stock_chart"
-
-
-# TODO: ADD
-# class BackTest(db.Model):
-#     __tablename__ = "back_test"
-
-
-# TODO: ADD
-# class TradeBot(db.Model):
-#     __tablename__ = "trade_bot"
+    # Composite unique constraint to ensure no duplicate entries for a stock on a given date
+    __table_args__ = (db.UniqueConstraint('code', 'date', name='uix_stock_date'),)
 
 # Create the database tables
 with app.app_context():
@@ -250,6 +248,7 @@ def add_stock():
     }), 201
 
 
+# API route to handle querying of all stocks
 @app.route('/stocks', methods=['GET'])
 def get_stocks():
     stocks = StockModel.query.all()
@@ -312,6 +311,7 @@ def get_stocks():
     } for stock in stocks])
 
 
+# API route to handle deletion of a single stock from the db
 @app.route('/stock/<int:stock_id>', methods=['DELETE'])
 def delete_stock(stock_id):
     try:
@@ -328,12 +328,103 @@ def delete_stock(stock_id):
         return jsonify({"error": "Error deleting stock"}), 500
 
 
+# API route to handle deletion of all stocks from the db
 @app.route('/stocks', methods=['DELETE'])
 def delete_all_stocks():
     db.session.query(StockModel).delete()
     db.session.commit()
 
     return jsonify({"message": "Deleted all stocks successfully"}), 200
+
+
+# API route to handle addition of stock price history to a stock
+@app.route('/stock_price', methods=['POST'])
+def add_stock_prices():
+    data = request.json
+    code = data.get('code')
+    country = data.get('country')
+    time_period = data.get('time_period')
+    time_interval = data.get('time_interval')
+
+    print(f"Received request to add stock price history for {code} from {country}")
+
+    # retrieving price history for given code
+    df = get_yf_stock_data(ticker=code, 
+                           time_period=time_period, 
+                           time_interval=time_interval)
+
+    # validate input data - column name
+    fields = ['Open', 'High', 'Low', 'Close', 'Adj_Close', 'Volume']
+    for required_field in fields:
+        if required_field not in df.columns:
+            return jsonify({'error': 'Missing required columns'}), 400
+    
+    # validate that all cols have the same length
+    if not all(len(df[df_col]) == df.shape[0] for df_col in df.columns):
+        return jsonify({'error': 'All columns must have the same length'}), 400
+
+    # check if the stock exists from StockModel
+    new_stock = StockModel.query.filter_by(code=code, country=country).first()
+    
+    # create instance of stock and corresponding price history
+    try:
+        # creating new stock if it does not exist
+        if not new_stock:
+            new_stock = StockModel(
+                code = code,
+                country = country
+            )
+            db.session.add(new_stock)
+        
+        # adding stock price data to the db for the given code
+        for index, row in df.iterrows():
+            new_price = StockPriceHistoryModel(
+                code=code,
+                date=index.date(),  # Assuming the index is a datetime
+                open_price=row['Open'],
+                high_price=row['High'],
+                low_price=row['Low'],
+                close_price=row['Close'],
+                adj_close_price=row['Adj_Close'],
+                volume=row['Volume']
+            )
+            db.session.add(new_price)
+        
+        db.session.commit()
+        return jsonify({'message': f"Stock prices added successfully for {code}"}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/stock_price/<string:code>', methods=['GET'])
+def get_stock_prices(code):
+    # Check if the stock exists
+    stock = StockModel.query.filter_by(code=code).first()
+    if not stock:
+        return jsonify({'error': f"Stock with code {code} not found"}), 404
+    
+    query = StockPriceHistoryModel.query.filter_by(code=code)
+    prices = query.order_by(StockPriceHistoryModel.date).all()
+
+    # Prepare response
+    response_data = {
+        'code': code,
+        'prices': [
+            {
+                'date': price.date.strftime('%Y-%m-%d'),
+                'open': price.open_price,
+                'high': price.high_price,
+                'low': price.low_price,
+                'close': price.close_price,
+                'adj_close': price.adj_close_price,
+                'volume': price.volume
+            } for price in prices
+        ]
+    }
+
+    return jsonify(response_data), 200
 
 
 if __name__ == "__main__":

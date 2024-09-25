@@ -24,8 +24,11 @@ def get_yf_stock_data(
         # Convert to pandas DataFrame
         df = pd.DataFrame(data)
 
+        # Renaming Column name to not cause error
+        df.rename(columns={'Adj Close': 'Adj_Close'}, inplace=True)
+
         # Round specified columns to 2 decimal places
-        columns_to_round = ['Open', 'High', 'Low', 'Close', 'Adj Close']
+        columns_to_round = ['Open', 'High', 'Low', 'Close', 'Adj_Close']
         df[columns_to_round] = df[columns_to_round].round(2)
         
         return df
@@ -38,7 +41,3 @@ def get_yf_stock_data(
 def round_result(result):
     num_dp = 2
     return round(result, num_dp)
-
-if __name__ == "__main__":
-    res = get_yf_stock_data("AAPL")
-    print((res))
