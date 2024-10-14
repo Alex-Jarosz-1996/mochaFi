@@ -397,7 +397,7 @@ def add_stock_prices():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-
+# API route to handle retrieval of a stock price history
 @app.route('/stock_price/<string:code>', methods=['GET'])
 def get_stock_prices(code):
     # Check if the stock exists
