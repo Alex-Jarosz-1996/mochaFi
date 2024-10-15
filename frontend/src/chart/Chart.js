@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush, Bar } from 'recharts';
 import ReactECharts from 'echarts-for-react';
 import { DesktopWrapper, Form, Input, Select, Button, Title, ButtonGroup, DeleteButton } from '../styles';
 import { format } from 'date-fns';
@@ -12,7 +12,7 @@ const Chart = () => {
   const [stockData, setStockData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [chartType, setChartType] = useState('line'); // State for toggling between chart types
+  const [chartType, setChartType] = useState('line');
 
   const fetchStockData = async () => {
     setLoading(true);
@@ -52,7 +52,7 @@ const Chart = () => {
         setStockData(null);
         throw new Error('Failed to add stock data');
       }
-      await fetchStockData(); // Fetch the data after adding it
+      await fetchStockData();
     } catch (err) {
       console.log(err.message);
       setError(err.message);
@@ -71,7 +71,7 @@ const Chart = () => {
       if (!response.ok) {
         throw new Error('Failed to delete stocks');
       }
-      setStockData(null); // Clear the stock data after deletion
+      setStockData(null);
     } catch (err) {
       console.log(err.message);
       setError(err.message);
@@ -85,57 +85,118 @@ const Chart = () => {
     addStockData();
   };
 
-  // Function to format the date as 'MMM yy', e.g., Jan 24, Feb 24
-  const formatXAxisDate = (tickItem) => {
-    return format(new Date(tickItem), 'MMM yy');
-  };
+  const formatXAxisDate = (tickItem) => format(new Date(tickItem), 'MMM yy');
 
-  // Format stockData for ECharts candlestick chart
   const formatCandlestickData = () => {
     if (!stockData) return { dates: [], prices: [] };
-    const formattedData = {
+    return {
       dates: stockData.prices.map((item) => item.date),
-      prices: stockData.prices.map((item) => [item.open, item.close, item.low, item.high]), // Candlestick format: [open, close, low, high]
+      prices: stockData.prices.map((item) => [item.open, item.close, item.low, item.high]),
     };
-    return formattedData;
   };
 
-  // Render the ECharts candlestick chart
   const renderCandlestickChart = () => {
     const formattedData = formatCandlestickData();
+    const volumeData = stockData.prices.map((item) => ({
+      value: item.volume,
+      itemStyle: {
+        color: item.close > item.open ? '#00da3c' : '#ec0000', // Green if close > open, Red if close < open
+      },
+    }));
+  
     const option = {
-      title: {
-        text: `Candlestick Chart for ${ticker}`,
-      },
-      xAxis: {
-        type: 'category',
-        data: formattedData.dates,
-      },
-      yAxis: {
-        scale: true,
-      },
+      grid: [
+        { // Grid for the candlestick chart
+          left: '10%',
+          right: '8%',
+          height: '60%',
+        },
+        { // Grid for the volume chart
+          left: '10%',
+          right: '8%',
+          top: '75%',
+          height: '15%',
+        },
+      ],
+      xAxis: [
+        {
+          type: 'category',
+          data: formattedData.dates,
+          gridIndex: 0, // candlestick chart
+        },
+        {
+          type: 'category',
+          data: formattedData.dates,
+          gridIndex: 1, // volume chart
+          axisLabel: { show: false }, // hide axis labels for volume chart
+        },
+      ],
+      yAxis: [
+        {
+          scale: true,
+          gridIndex: 0, // candlestick chart
+        },
+        {
+          scale: true,
+          gridIndex: 1, // volume chart
+          axisLabel: { show: false }, // hide axis labels for volume chart
+        },
+      ],
       series: [
         {
           type: 'candlestick',
           data: formattedData.prices,
           itemStyle: {
-            color: '#00da3c', // Bullish candle color
-            color0: '#ec0000', // Bearish candle color
+            color: '#00da3c', // green -> bullish candle color
+            color0: '#ec0000', // red -> bearish candle color
             borderColor: '#008F28',
             borderColor0: '#8A0000',
           },
         },
+        {
+          name: 'Volume',
+          type: 'bar',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          data: volumeData,
+        },
       ],
+      tooltip: {
+        trigger: 'axis', // show tooltip when hovering over axis points
+        axisPointer: {
+          type: 'shadow', // make the tooltip follow the bar
+        },
+        formatter: (params) => {
+          const candlestick = params.find((p) => p.seriesType === 'candlestick');
+          const volume = params.find((p) => p.seriesName === 'Volume');
+  
+          // Safely access both candlestick and volume data
+          let tooltipText = '';
+          if (candlestick) {
+            tooltipText += `
+              Date: ${candlestick.name}<br/>
+              Open: ${candlestick.data[1]}<br/>
+              Close: ${candlestick.data[0]}<br/>
+              High: ${candlestick.data[3]}<br/>
+              Low: ${candlestick.data[2]}<br/>
+            `;
+          }
+          if (volume) {
+            tooltipText += `Volume: ${volume.data.value.toLocaleString()}<br/>`;
+          }
+          return tooltipText;
+        },
+      },
       dataZoom: [
         {
-          type: 'slider', // Slider for zooming
-          xAxisIndex: 0,  // Horizontal zooming
-          start: 0,       // Default starting range
-          end: 100,       // Default ending range
+          type: 'slider', // slider for zooming both charts
+          xAxisIndex: [0, 1],
+          start: 0,
+          end: 100,
         },
         {
-          type: 'inside', // Allows zooming by dragging
-          xAxisIndex: 0,  // Horizontal zooming
+          type: 'inside', // allows zooming by dragging
+          xAxisIndex: [0, 1],
           start: 0,
           end: 100,
         },
@@ -144,8 +205,8 @@ const Chart = () => {
   
     return <ReactECharts option={option} style={{ height: 400, width: '100%' }} />;
   };
-
-  // Custom Tooltip to display close, high, low, and volume
+  
+  
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -212,7 +273,6 @@ const Chart = () => {
           </DeleteButton>
         </ButtonGroup>
 
-        {/* Dropdown for selecting chart type */}
         <Select value={chartType} onChange={(e) => setChartType(e.target.value)}>
           <option value="line">Line Chart</option>
           <option value="candlestick">Candlestick Chart</option>
@@ -234,11 +294,12 @@ const Chart = () => {
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={() => ''} />
                 <Line type="monotone" dataKey="close" stroke="#8884d8" dot={false} />
+                <Bar dataKey="volume" fill="#82ca9d" />
                 <Brush dataKey="date" height={30} stroke="#8884d8" />
               </LineChart>
             </ResponsiveContainer>
-                      ) : (
-            renderCandlestickChart() // Render candlestick chart if selected
+          ) : (
+            renderCandlestickChart()
           )}
         </div>
       )}
