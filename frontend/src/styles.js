@@ -19,12 +19,12 @@ export const Input = styled.input`
 `;
 
 export const Select = styled.select`
-  width: 120px;
+  width: 150px;
   padding: 10px;
 `;
 
 export const Button = styled.button`
-  padding: 10px 20px;
+  padding: 5px 10px;
   cursor: pointer;
   height: 40px;
 `;
@@ -96,7 +96,7 @@ export const DeleteButton = styled(Button)`
   background-color: #ff4d4d;
   color: white;
   border: none;
-
+  margin-left: 10px;
   &:hover {
     background-color: #ff3333;
   }

@@ -21,6 +21,8 @@ import {
   DesktopWrapper
 } from '../styles';
 
+const HOST_URL = "http://localhost:5000";
+
 const metricCategories = {
   "Basic Info": ["code", "country", "price", "marketCap", "numSharesAvail"],
   "Price Metrics": ["yearlyLowPrice", "yearlyHighPrice", "fiftyDayMA", "twoHundredDayMA"],
@@ -109,7 +111,7 @@ const Stats = () => {
 
   const fetchStocks = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/stocks');
+      const response = await axios.get(`${HOST_URL}/stocks`);
       setStocks(response.data);
     } catch (error) {
       console.error('Error fetching stocks:', error);
@@ -119,7 +121,7 @@ const Stats = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/stock', { stock, country });
+      await axios.post(`${HOST_URL}/stock`, { stock, country });
       setStock('');
       setCountry('');
       fetchStocks();
@@ -130,7 +132,7 @@ const Stats = () => {
 
   const handleDelete = async (stockId) => {
     try {
-      await axios.delete(`http://localhost:5000/stock/${stockId}`);
+      await axios.delete(`${HOST_URL}/stock/${stockId}`);
       fetchStocks();
     } catch (error) {
       console.error('Error deleting stock:', error);
@@ -139,7 +141,7 @@ const Stats = () => {
 
   const handleDeleteAll = async () => {
     try {
-      await axios.delete('http://localhost:5000/stocks');
+      await axios.delete(`${HOST_URL}/stocks`);
       fetchStocks();
     } catch (error) {
       console.error('Error deleting all stocks:', error);

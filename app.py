@@ -375,25 +375,30 @@ def add_stock_prices():
                 country = country
             )
             db.session.add(new_stock)
+
+        # check if the stock exists from StockModel
+        new_stock_price_history = StockPriceHistoryModel.query.filter_by(code=code).first()
         
         # adding stock price data to the db for the given code
-        for index, row in df.iterrows():
-            new_price = StockPriceHistoryModel(
-                code=code,
-                date=index.date(),  # Assuming the index is a datetime
-                open_price=row['Open'],
-                high_price=row['High'],
-                low_price=row['Low'],
-                close_price=row['Close'],
-                adj_close_price=row['Adj_Close'],
-                volume=row['Volume']
-            )
-            db.session.add(new_price)
+        if not new_stock_price_history:
+            for index, row in df.iterrows():
+                new_price = StockPriceHistoryModel(
+                    code=code,
+                    date=index.date(),  # Assuming the index is a datetime
+                    open_price=row['Open'],
+                    high_price=row['High'],
+                    low_price=row['Low'],
+                    close_price=row['Close'],
+                    adj_close_price=row['Adj_Close'],
+                    volume=row['Volume']
+                )
+                db.session.add(new_price)
         
         db.session.commit()
         return jsonify({'message': f"Stock prices added successfully for {code}"}), 201
 
     except Exception as e:
+        print(e)
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
@@ -425,6 +430,14 @@ def get_stock_prices(code):
     }
 
     return jsonify(response_data), 200
+
+# API route to handle deletion of all stocks from the db
+@app.route('/stock_price_delete', methods=['DELETE'])
+def delete_all_stock_price_histories():
+    db.session.query(StockPriceHistoryModel).delete()
+    db.session.commit()
+
+    return jsonify({"message": "Deleted all stock price histories successfully"}), 200
 
 
 if __name__ == "__main__":
