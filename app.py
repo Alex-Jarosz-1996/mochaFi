@@ -29,8 +29,8 @@ db = SQLAlchemy(app)
 class StockModel(db.Model):
     __tablename__ = "stock"
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(8), unique=True, nullable=False)
-    country = db.Column(db.String(5), unique=False, nullable=False)
+    code = db.Column(db.String(8), unique=True, nullable=True)
+    country = db.Column(db.String(5), unique=False, nullable=True)
     price = db.Column(db.Float, nullable=True)
     marketCap = db.Column(db.Float, nullable=True)
     numSharesAvail = db.Column(db.Float, nullable=True)
@@ -92,14 +92,14 @@ class StockPriceHistoryModel(db.Model):
     __tablename__ = "stock_price_history"
     
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    open_price = db.Column(db.Float, nullable=False)
-    high_price = db.Column(db.Float, nullable=False)
-    low_price = db.Column(db.Float, nullable=False)
-    close_price = db.Column(db.Float, nullable=False)
-    adj_close_price = db.Column(db.Float, nullable=False)
-    volume = db.Column(db.BigInteger, nullable=False)
+    code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=True)
+    date = db.Column(db.Date, nullable=True)
+    open_price = db.Column(db.Float, nullable=True)
+    high_price = db.Column(db.Float, nullable=True)
+    low_price = db.Column(db.Float, nullable=True)
+    close_price = db.Column(db.Float, nullable=True)
+    adj_close_price = db.Column(db.Float, nullable=True)
+    volume = db.Column(db.BigInteger, nullable=True)
 
     # Relationship to StockModel
     stock = db.relationship('StockModel', backref=db.backref('price_history', lazy='dynamic'))
