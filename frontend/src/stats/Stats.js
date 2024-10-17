@@ -93,7 +93,7 @@ const metricDisplayNames = {
 const Stats = () => {
   const [stock, setStock] = useState('');
   const [country, setCountry] = useState('');
-  const [countries] = useState(['AUS', 'US']);
+  const [countries] = useState(['US']); // NOTE: add 'AUS' when have access to more secure data
   const [stocks, setStocks] = useState([]);
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
