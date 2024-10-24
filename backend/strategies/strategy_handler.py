@@ -1,8 +1,8 @@
 import pandas as pd
-from mochaFi.backend.strategies.strategy_ma import Strategy_MA
-from mochaFi.backend.strategies.strategy_macd import Strategy_MACD
-from mochaFi.backend.strategies.strategy_rsi import Strategy_RSI
-from mochaFi.backend.strategies.strategy_vw_macd import Strategy_VW_MACD
+from backend.strategies.strategy_ma import Strategy_MA
+from backend.strategies.strategy_macd import Strategy_MACD
+from backend.strategies.strategy_rsi import Strategy_RSI
+from backend.strategies.strategy_vw_macd import Strategy_VW_MACD
 
 class StrategyHandler:
     def __init__(self, data: pd.DataFrame):

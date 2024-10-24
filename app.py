@@ -4,10 +4,14 @@ from flask import Flask, jsonify, request
 
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
 from backend.common.core import get_yf_stock_data
 from backend.data.utils.controller import StockController
+from backend.strategies.strategy_handler import StrategyHandler
+from backend.strategies.results import Results
+from backend.strategies.trades import Trades
 
 # initialising flask app
 app = Flask(__name__)
@@ -93,6 +97,7 @@ class StockPriceHistoryModel(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=True)
+    country = db.Column(db.String(5), unique=False, nullable=True)
     date = db.Column(db.Date, nullable=True)
     open_price = db.Column(db.Float, nullable=True)
     high_price = db.Column(db.Float, nullable=True)
@@ -102,10 +107,51 @@ class StockPriceHistoryModel(db.Model):
     volume = db.Column(db.BigInteger, nullable=True)
 
     # Relationship to StockModel
-    stock = db.relationship('StockModel', backref=db.backref('price_history', lazy='dynamic'))
+    stock = db.relationship('StockModel', backref=db.backref('price_histories', lazy='dynamic'))
 
     # Composite unique constraint to ensure no duplicate entries for a stock on a given date
     __table_args__ = (db.UniqueConstraint('code', 'date', name='uix_stock_date'),)
+
+
+class TradesModel(db.Model):
+    __tablename__ = "trades"
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=True)
+    country = db.Column(db.String(5), unique=False, nullable=True)
+    date = db.Column(db.Date, nullable=True)
+    close_price = db.Column(db.Float, nullable=True)
+    buy_signal = db.Column(db.Float, nullable=True)
+    buy_price = db.Column(db.Float, nullable=True)
+    sell_signal = db.Column(db.Float, nullable=True)
+    sell_price = db.Column(db.Float, nullable=True)
+    
+    # Relationship to StockModel
+    stock = db.relationship('StockModel', backref=db.backref('trades', lazy='dynamic'))
+
+    __table_args__ = (db.UniqueConstraint('code', 'date', name='uix_trades_date'),)
+
+
+class ResultsModel(db.Model):
+    __tablename__ = "results"
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=True)
+    country = db.Column(db.String(5), unique=False, nullable=True)
+    buy_sell_pairs = db.Column(db.JSON, nullable=True)
+    total_profit = db.Column(db.Float, nullable=True)
+    total_profit_per_trade = db.Column(db.JSON, nullable=True)
+    total_number_of_trades = db.Column(db.Integer, nullable=True)
+    number_profit_trades = db.Column(db.Integer, nullable=True)
+    number_loss_trades = db.Column(db.Integer, nullable=True)
+    pct_win = db.Column(db.Float, nullable=True)
+    pct_loss = db.Column(db.Float, nullable=True)
+    greatest_profit = db.Column(db.Float, nullable=True)
+    greatest_loss = db.Column(db.Float, nullable=True)
+
+    # Relationship to StockModel
+    stock = db.relationship('StockModel', backref=db.backref('results', lazy='dynamic'))
+
+    __table_args__ = (db.UniqueConstraint('code', name='uix_results_code'),)
+
 
 # Create the database tables
 with app.app_context():
@@ -363,19 +409,8 @@ def add_stock_prices():
     if not all(len(df[df_col]) == df.shape[0] for df_col in df.columns):
         return jsonify({'error': 'All columns must have the same length'}), 400
 
-    # check if the stock exists from StockModel
-    new_stock = StockModel.query.filter_by(code=code, country=country).first()
-    
     # create instance of stock and corresponding price history
     try:
-        # creating new stock if it does not exist
-        if not new_stock:
-            new_stock = StockModel(
-                code = code,
-                country = country
-            )
-            db.session.add(new_stock)
-
         # check if the stock exists from StockModel
         new_stock_price_history = StockPriceHistoryModel.query.filter_by(code=code).first()
         
@@ -384,6 +419,7 @@ def add_stock_prices():
             for index, row in df.iterrows():
                 new_price = StockPriceHistoryModel(
                     code=code,
+                    country=country,
                     date=index.date(),  # Assuming the index is a datetime
                     open_price=row['Open'],
                     high_price=row['High'],
@@ -405,11 +441,6 @@ def add_stock_prices():
 # API route to handle retrieval of a stock price history
 @app.route('/stock_price/<string:code>', methods=['GET'])
 def get_stock_prices(code):
-    # Check if the stock exists
-    stock = StockModel.query.filter_by(code=code).first()
-    if not stock:
-        return jsonify({'error': f"Stock with code {code} not found"}), 404
-    
     query = StockPriceHistoryModel.query.filter_by(code=code)
     prices = query.order_by(StockPriceHistoryModel.date).all()
 
@@ -439,6 +470,114 @@ def delete_all_stock_price_histories():
 
     return jsonify({"message": "Deleted all stock price histories successfully"}), 200
 
+
+@app.route('/strategy', methods=['POST'])
+def add_strategy():
+    data = request.json
+    code = data.get('code')
+    country = data.get('country')
+    strategy_name = data.get('strategy')
+    time_period = data.get('time_period')
+    time_interval = data.get('time_interval')
+    window_slow = data.get('window_slow')
+    window_fast = data.get('window_fast')
+
+    # Fetch stock data using a helper function
+    df = get_yf_stock_data(ticker=code, time_period=time_period, time_interval=time_interval)
+
+    try:
+        handler = StrategyHandler(data=df)
+        strategy = handler.get_strategy(strategy_name=strategy_name,
+                                        window_slow=window_slow,
+                                        window_fast=window_fast)
+        
+        trades = Trades(strategy)
+        if not TradesModel.query.filter_by(code=code).first():
+            for index, row in trades._data.iterrows():
+                new_trade_entry = TradesModel(
+                    code=code,
+                    country=country,
+                    date=index.date(),
+                    close_price=row['Close'],
+                    buy_signal=row['BuySignal'],
+                    buy_price=row['BuyPrice'],
+                    sell_signal=row['SellSignal'],
+                    sell_price=row['SellPrice']
+                )
+                db.session.add(new_trade_entry)
+
+        results = Results(trades)
+        if not ResultsModel.query.filter_by(code=code).first():
+            new_result_entry = ResultsModel(
+                code=code,
+                country=country,
+                total_profit=results.total_profit,
+                total_profit_per_trade=results.total_profit_per_trade,
+                total_number_of_trades=results.total_number_of_trades,
+                number_profit_trades=results.number_profit_trades,
+                number_loss_trades=results.number_loss_trades,
+                pct_win=results.pct_win,
+                pct_loss=results.pct_loss,
+                greatest_profit=results.greatest_profit,
+                greatest_loss=results.greatest_loss
+            )
+            db.session.add(new_result_entry)
+
+        db.session.commit()
+        return jsonify({'message': f"Trades and Results recorded for {code}"}), 201
+    
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/trades/<string:code>', methods=['GET'])
+def get_code_trades(code):
+    query = TradesModel.query.filter_by(code=code).order_by(TradesModel.date).all()
+
+    if query:
+        response_data = {
+            'code': code,
+            'results': [
+                {
+                    'country': trade.country,
+                    'date': trade.date.strftime('%Y-%m-%d'),
+                    'close_price': trade.close_price,
+                    'buy_signal': trade.buy_signal,
+                    'buy_price': trade.buy_price,
+                    'sell_signal': trade.sell_signal,
+                    'sell_price': trade.sell_price,
+                } for trade in query
+            ]
+        }
+        return jsonify(response_data), 200
+    else:
+        return jsonify({'error': 'No trades found for the given code'}), 404
+
+
+@app.route('/results/<string:code>', methods=['GET'])
+def get_code_results(code):
+    result = ResultsModel.query.filter_by(code=code).first()
+
+    if result:
+        response_data = {
+            'code': result.code,
+            'country': result.country,
+            'buy_sell_pairs': result.buy_sell_pairs,
+            'total_profit': result.total_profit,
+            'total_profit_per_trade': result.total_profit_per_trade,
+            'total_number_of_trades': result.total_number_of_trades,
+            'number_profit_trades': result.number_profit_trades,
+            'number_loss_trades': result.number_loss_trades,
+            'pct_win': result.pct_win,
+            'pct_loss': result.pct_loss,
+            'greatest_profit': result.greatest_profit,
+            'greatest_loss': result.greatest_loss,
+        }
+        return jsonify(response_data), 200
+    else:
+        return jsonify({'error': 'Results not found for the given code'}), 404
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
