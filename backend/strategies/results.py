@@ -1,5 +1,7 @@
 import pandas as pd
 
+from backend.common.core import round_result
+
 class Results:
     """
     Class that provides the following information about each strategy:
@@ -57,7 +59,7 @@ class Results:
             sell_price = result[-1]
             total += (sell_price - buy_price)
         
-        return total
+        return round_result(total)
 
     def determine_total_profit_per_trade(self):
         """
@@ -67,7 +69,7 @@ class Results:
         for result in self.buy_sell_pairs:
             buy_price = result[0]
             sell_price = result[-1]
-            profit.append(sell_price - buy_price)
+            profit.append(round_result(sell_price - buy_price))
         
         return profit
 
@@ -110,7 +112,7 @@ class Results:
         num_profit = self.number_profit_trades
         total_num_trades = self.total_number_of_trades
         pct_win = num_profit / total_num_trades
-        return pct_win
+        return round_result(pct_win)
 
     def determine_pct_loss_from_strategy(self):
         """
@@ -119,16 +121,16 @@ class Results:
         num_loss = self.number_loss_trades
         total_num_trades = self.total_number_of_trades
         pct_loss = num_loss / total_num_trades
-        return pct_loss
+        return round_result(pct_loss)
 
     def determine_greatest_profit(self):
         """
         Identifies the highest profit from a single trade.
         """
-        return max(self.total_profit_per_trade)
+        return round_result(max(self.total_profit_per_trade))
 
     def determine_greatest_loss(self):
         """
         Identifies the largest loss from a single trade.
         """
-        return min(self.total_profit_per_trade)
+        return round_result(min(self.total_profit_per_trade))
