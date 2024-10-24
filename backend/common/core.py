@@ -39,5 +39,7 @@ def get_yf_stock_data(
 
 
 def round_result(result):
-    num_dp = 2
-    return round(result, num_dp)
+    """
+    Rounds result to 2 dp.
+    """
+    return round(result, 2)
