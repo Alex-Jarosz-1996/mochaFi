@@ -479,8 +479,8 @@ def add_strategy():
     strategy_name = data.get('strategy')
     time_period = data.get('time_period')
     time_interval = data.get('time_interval')
-    window_slow = data.get('window_slow')
-    window_fast = data.get('window_fast')
+    window_slow = int(data.get('window_slow'))
+    window_fast = int(data.get('window_fast'))
 
     # Fetch stock data using a helper function
     df = get_yf_stock_data(ticker=code, time_period=time_period, time_interval=time_interval)

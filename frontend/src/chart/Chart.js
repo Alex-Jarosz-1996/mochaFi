@@ -6,9 +6,9 @@ import { format } from 'date-fns';
 
 const Chart = () => {
   const [ticker, setTicker] = useState('');
-  const [timePeriod, setTimePeriod] = useState('1y');
-  const [timeInterval, setTimeInterval] = useState('1d');
-  const [country, setCountry] = useState('US');
+  const [timePeriod, setTimePeriod] = useState('');
+  const [timeInterval, setTimeInterval] = useState('');
+  const [country, setCountry] = useState('');
   const [stockData, setStockData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -235,9 +235,11 @@ const Chart = () => {
           required
         />
         <Select value={country} onChange={(e) => setCountry(e.target.value)}>
+          <option value="">Select country</option>
           <option value="US">United States</option>
         </Select>
         <Select value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)}>
+          <option value="">Select time period</option>
           <option value="1d">1 Day</option>
           <option value="5d">5 Days</option>
           <option value="1mo">1 Month</option>
@@ -251,6 +253,7 @@ const Chart = () => {
           <option value="max">Max</option>
         </Select>
         <Select value={timeInterval} onChange={(e) => setTimeInterval(e.target.value)}>
+          <option value="">Select time interval</option>
           <option value="1m">1 Minute</option>
           <option value="2m">2 Minutes</option>
           <option value="5m">5 Minutes</option>

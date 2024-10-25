@@ -8,8 +8,8 @@ class Strategy_MA:
         
         # algorithm implementation
         close_prices = data["Close"]
-        ma_fast = close_prices.rolling(window=window_slow, min_periods=1).mean()
-        ma_slow = close_prices.rolling(window=window_fast, min_periods=1).mean()
+        ma_fast = close_prices.rolling(window=window_fast, min_periods=1).mean()
+        ma_slow = close_prices.rolling(window=window_slow, min_periods=1).mean()
 
         data["MA_fast"] = ma_fast
         data["MA_slow"] = ma_slow
