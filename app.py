@@ -136,7 +136,10 @@ class ResultsModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=True)
     country = db.Column(db.String(5), unique=False, nullable=True)
+    initial_investment = db.Column(db.Float, nullable=True)
     buy_sell_pairs_timestamp = db.Column(db.JSON, nullable=True)
+    profit_loss_shares = db.Column(db.JSON, nullable=True)
+    strategy_roi = db.Column(db.Float, nullable=True)
     total_profit = db.Column(db.Float, nullable=True)
     total_profit_per_trade = db.Column(db.JSON, nullable=True)
     total_number_of_trades = db.Column(db.Integer, nullable=True)
@@ -517,7 +520,10 @@ def add_strategy():
             new_result_entry = ResultsModel(
                 code=code,
                 country=country,
+                initial_investment = results.INITIAL_INVESTMENT,
                 buy_sell_pairs_timestamp = results.buy_sell_pairs_timestamp,
+                profit_loss_shares = results.profit_loss_shares,
+                strategy_roi = results.strategy_roi,
                 total_profit=results.total_profit,
                 total_profit_per_trade=results.total_profit_per_trade,
                 total_number_of_trades=results.total_number_of_trades,
@@ -570,7 +576,10 @@ def get_code_results(code):
         response_data = {
             'code': result.code,
             'country': result.country,
+            'initial_investment': result.initial_investment,
             'buy_sell_pairs_timestamp': result.buy_sell_pairs_timestamp,
+            'profit_loss_shares': result.profit_loss_shares,
+            'strategy_roi': result.strategy_roi,
             'total_profit': result.total_profit,
             'total_profit_per_trade': result.total_profit_per_trade,
             'total_number_of_trades': result.total_number_of_trades,

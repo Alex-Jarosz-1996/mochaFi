@@ -140,6 +140,35 @@ const Strategy = () => {
     }
   };
   
+  // Consolidate and align dates
+  const consolidateDates = () => {
+    const tradesDates = tradesData?.results?.map((trade) => trade.date) || [];
+    const buySellDates = resultsData?.buy_sell_pairs_timestamp?.flatMap((pair) => [pair[0], pair[2]]) || [];
+    const profitLossDates = resultsData?.profit_loss_shares?.map((entry) => entry[0]) || [];
+
+    // Combine, deduplicate, and sort all dates
+    const allDates = [...new Set([...tradesDates, ...buySellDates, ...profitLossDates])];
+    allDates.sort((a, b) => new Date(a) - new Date(b));
+
+    return allDates;
+  };
+
+  // Align data using the consolidated dates
+  const alignDataWithDates = (allDates) => {
+    let cumulativeInvestment = resultsData?.initial_investment || 0;
+    let alignedGrowthData = [];
+    
+    allDates.forEach((date) => {
+      const profitLoss = resultsData?.profit_loss_shares?.find(([d]) => d === date);
+      if (profitLoss) {
+        cumulativeInvestment += profitLoss[1];
+      }
+      alignedGrowthData.push({ date, value: cumulativeInvestment });
+    });
+
+    return alignedGrowthData;
+  };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     addStrategyData();
@@ -149,8 +178,7 @@ const Strategy = () => {
 
   const renderLineChart = () => (
     <ResponsiveContainer width="100%" height={400}>
-      {/* Stock Line Chart */}
-      <LineChart data={tradesData.results}>
+      <LineChart data={tradesData?.results || []}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" tickFormatter={formatXAxisDate} />
         <YAxis label={{ value: '$', position: 'insideLeft' }} />
@@ -160,15 +188,13 @@ const Strategy = () => {
         <Bar dataKey="volume" fill="#82ca9d" />
         <Brush dataKey="date" height={30} stroke="#8884d8" />
 
-        {/* Up/Down arrows of trades */}
-        {resultsData.buy_sell_pairs_timestamp.map((trade, index) => {
+        {resultsData?.buy_sell_pairs_timestamp?.map((trade, index) => {
           const [buyDate, buyPrice, sellDate, sellPrice] = trade;
           const isProfitable = sellPrice > buyPrice;
-          const arrowColour = isProfitable ? '#00b300' : '#ff4d4f'; // Green for profit, Red for loss
-          
+          const arrowColour = isProfitable ? '#00b300' : '#ff4d4f';
+
           return (
             <React.Fragment key={index}>
-              {/* Buy signal arrow */}
               <ReferenceDot
                 x={buyDate}
                 y={buyPrice}
@@ -176,15 +202,13 @@ const Strategy = () => {
                 fill={arrowColour}
                 stroke={arrowColour}
                 label={{
-                  value: '↑', // up arrow for buy
+                  value: '↑',
                   position: 'top',
                   fill: arrowColour,
                   fontSize: 16,
                   fontWeight: 'bold',
                 }}
               />
-  
-              {/* Sell signal arrow */}
               <ReferenceDot
                 x={sellDate}
                 y={sellPrice}
@@ -192,7 +216,7 @@ const Strategy = () => {
                 fill={arrowColour}
                 stroke={arrowColour}
                 label={{
-                  value: '↓', // down arrow for sell
+                  value: '↓',
                   position: 'bottom',
                   fill: arrowColour,
                   fontSize: 16,
@@ -201,11 +225,13 @@ const Strategy = () => {
               />
             </React.Fragment>
           );
-        })};
-
+        })}
       </LineChart>
     </ResponsiveContainer>
   );
+  
+  const allDates = consolidateDates();
+  const alignedGrowthData = alignDataWithDates(allDates);
   
   return (
     <div>
@@ -307,6 +333,21 @@ const Strategy = () => {
       {tradesData && resultsData && (
         <div>
           {renderLineChart()}
+        </div>
+      )}
+
+      {resultsData && alignedGrowthData.length > 0 && (
+        <div style={{ marginTop: '20px' }}>
+          <h4>Hypothetical Investment Growth</h4>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={alignedGrowthData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tickFormatter={formatXAxisDate} />
+              <YAxis label={{ value: 'Investment Value ($)', angle: -90, position: 'insideLeft' }} />
+              <Tooltip formatter={(value) => `$${value.toFixed(2)}`} labelFormatter={formatXAxisDate} />
+              <Line type="linear" dataKey="value" stroke="#8884d8" dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       )}
 

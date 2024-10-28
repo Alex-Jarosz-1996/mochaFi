@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 
 from backend.common.core import round_result
@@ -17,9 +18,13 @@ class Results:
         """
         Initializes the Results object with strategy data.
         """
+        self.INITIAL_INVESTMENT = 1000
+        
         self._data = strategy._data.copy()
         self.buy_sell_pairs_timestamp = self.collect_buy_sell_pairs_datetime()
         self.buy_sell_pairs = self.determine_buy_sell_pairs()
+        self.profit_loss_shares = self.determine_profit_loss_dependent_on_shares()
+        self.strategy_roi = self.determine_strategy_roi()
         self.total_profit = self.determine_total_profit()
         self.total_profit_per_trade = self.determine_total_profit_per_trade()
         self.total_number_of_trades = self.determine_number_of_trades()
@@ -86,6 +91,38 @@ class Results:
 
         return pairs
 
+    
+    def determine_profit_loss_dependent_on_shares(self):
+        """
+        Determine profit / loss per trade multiplied by number of shares.
+        Returns profit per trade and sell date.
+        """
+        buy_sell_pairs = self.collect_buy_sell_pairs_datetime()
+        
+        profit_per_trade_list = []
+        for buy_sell_pair in buy_sell_pairs:
+            buy_price, sell_date, sell_price = buy_sell_pair[1], buy_sell_pair[2], buy_sell_pair[-1]
+
+            num_shares = math.floor(self.INITIAL_INVESTMENT / buy_price)
+            profit_per_trade = round(num_shares * (sell_price - buy_price), 2)
+
+            profit_per_trade_list.append((sell_date, profit_per_trade))
+            
+        return profit_per_trade_list
+    
+
+    def determine_strategy_roi(self):
+        """
+        Determines strategy Return on Investment for investment period as a pct of initial investment.
+        """
+        total_profit = 0
+        for profit in self.determine_profit_loss_dependent_on_shares():
+            total_profit += profit[-1]
+
+        strategy_roi = 100 * (total_profit / self.INITIAL_INVESTMENT)
+        return strategy_roi
+    
+    
     def determine_total_profit(self):
         """
         Calculates the total profit or loss from all buy/sell pairs.
