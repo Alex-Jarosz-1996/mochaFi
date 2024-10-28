@@ -295,8 +295,7 @@ const Chart = () => {
                 <XAxis dataKey="date" tickFormatter={formatXAxisDate} />
                 <YAxis label={{ value: '$', position: 'insideLeft' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend formatter={() => ''} />
-                <Line type="monotone" dataKey="close" stroke="#8884d8" dot={false} />
+                <Line type="monotone" dataKey="close" name="Close Price" stroke="#8884d8" dot={false} />
                 <Bar dataKey="volume" fill="#82ca9d" />
                 <Brush dataKey="date" height={30} stroke="#8884d8" />
               </LineChart>

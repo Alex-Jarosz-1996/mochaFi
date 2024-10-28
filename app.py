@@ -136,7 +136,7 @@ class ResultsModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), db.ForeignKey('stock.code'), nullable=True)
     country = db.Column(db.String(5), unique=False, nullable=True)
-    buy_sell_pairs = db.Column(db.JSON, nullable=True)
+    buy_sell_pairs_timestamp = db.Column(db.JSON, nullable=True)
     total_profit = db.Column(db.Float, nullable=True)
     total_profit_per_trade = db.Column(db.JSON, nullable=True)
     total_number_of_trades = db.Column(db.Integer, nullable=True)
@@ -479,8 +479,14 @@ def add_strategy():
     strategy_name = data.get('strategy')
     time_period = data.get('time_period')
     time_interval = data.get('time_interval')
-    window_slow = int(data.get('window_slow'))
-    window_fast = int(data.get('window_fast'))
+    window_slow = data.get('window_slow')
+    window_fast = data.get('window_fast')
+
+    if isinstance(window_slow, str):
+        window_slow = int(window_slow)
+
+    if isinstance(window_fast, str):
+        window_fast = int(window_fast)
 
     # Fetch stock data using a helper function
     df = get_yf_stock_data(ticker=code, time_period=time_period, time_interval=time_interval)
@@ -511,6 +517,7 @@ def add_strategy():
             new_result_entry = ResultsModel(
                 code=code,
                 country=country,
+                buy_sell_pairs_timestamp = results.buy_sell_pairs_timestamp,
                 total_profit=results.total_profit,
                 total_profit_per_trade=results.total_profit_per_trade,
                 total_number_of_trades=results.total_number_of_trades,
@@ -563,7 +570,7 @@ def get_code_results(code):
         response_data = {
             'code': result.code,
             'country': result.country,
-            'buy_sell_pairs': result.buy_sell_pairs,
+            'buy_sell_pairs_timestamp': result.buy_sell_pairs_timestamp,
             'total_profit': result.total_profit,
             'total_profit_per_trade': result.total_profit_per_trade,
             'total_number_of_trades': result.total_number_of_trades,
@@ -577,6 +584,30 @@ def get_code_results(code):
         return jsonify(response_data), 200
     else:
         return jsonify({'error': 'Results not found for the given code'}), 404
+    
+
+@app.route('/remove_strategy/<string:code>', methods=['DELETE'])
+def delete_strategy(code):
+    try:
+        trade = TradesModel.query.filter_by(code=code).first()
+        result = ResultsModel.query.filter_by(code=code).first()
+        
+        if not trade and not result:
+            return jsonify({"error": "No trade or result information found for this code."}), 404
+
+        if trade: # delete trade if it exists
+            db.session.delete(trade)
+
+        if result: # delete result if it exists
+            db.session.delete(result)
+
+        db.session.commit()
+        return jsonify({"message": f"Strategy information for stock {code} removed."}), 200
+
+    except Exception as e:
+        db.session.rollback()  # Roll back any partial changes
+        print(f"Error removing strategy for stock: {e}")
+        return jsonify({"error": f"Error removing strategy for stock: {e}"}), 500
     
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Select } from '../styles';
+import { Button, Form, Input, Select, DeleteButton, ButtonGroup } from '../styles';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush, Bar, ReferenceDot } from 'recharts';
+import { format } from 'date-fns';
 
 const HOST_URL = "http://localhost:5000";
 
@@ -77,6 +79,8 @@ const Strategy = () => {
       }
 
       const data = await response.json();
+      console.log("Fetching Trades Data");
+      console.log(data);
       setTradesData(data);
 
     } catch (err) {
@@ -102,6 +106,8 @@ const Strategy = () => {
       }
 
       const data = await response.json();
+      console.log("Fetching Results Data");
+      console.log(data);
       setResultsData(data);
 
     } catch (err) {
@@ -113,10 +119,93 @@ const Strategy = () => {
     }
   };
 
+  const deleteStrategy = async (stock) => {
+    setError(null);
+    try {
+      const response = await fetch(`${HOST_URL}/remove_strategy/${stock}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove strategy');
+      }
+
+    } catch (err) {
+      console.log(err.message);
+      setError(err.message);
+
+    } finally {
+      setTradesData(null);
+      setResultsData(null);
+    }
+  };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     addStrategyData();
   };
+
+  const formatXAxisDate = (tickItem) => format(new Date(tickItem), 'MMM dd, yyyy');
+
+  const renderLineChart = () => (
+    <ResponsiveContainer width="100%" height={400}>
+      {/* Stock Line Chart */}
+      <LineChart data={tradesData.results}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="date" tickFormatter={formatXAxisDate} />
+        <YAxis label={{ value: '$', position: 'insideLeft' }} />
+        <Tooltip formatter={(value) => `$${value}`} labelFormatter={(label) => formatXAxisDate(label)} />
+        <Legend />
+        <Line type="monotone" dataKey="close_price" name="Close Price" stroke="#8884d8" dot={false} />
+        <Bar dataKey="volume" fill="#82ca9d" />
+        <Brush dataKey="date" height={30} stroke="#8884d8" />
+
+        {/* Up/Down arrows of trades */}
+        {resultsData.buy_sell_pairs_timestamp.map((trade, index) => {
+          const [buyDate, buyPrice, sellDate, sellPrice] = trade;
+          const isProfitable = sellPrice > buyPrice;
+          const arrowColour = isProfitable ? '#00b300' : '#ff4d4f'; // Green for profit, Red for loss
+          
+          return (
+            <React.Fragment key={index}>
+              {/* Buy signal arrow */}
+              <ReferenceDot
+                x={buyDate}
+                y={buyPrice}
+                r={8}
+                fill={arrowColour}
+                stroke={arrowColour}
+                label={{
+                  value: '↑', // up arrow for buy
+                  position: 'top',
+                  fill: arrowColour,
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                }}
+              />
+  
+              {/* Sell signal arrow */}
+              <ReferenceDot
+                x={sellDate}
+                y={sellPrice}
+                r={8}
+                fill={arrowColour}
+                stroke={arrowColour}
+                label={{
+                  value: '↓', // down arrow for sell
+                  position: 'bottom',
+                  fill: arrowColour,
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                }}
+              />
+            </React.Fragment>
+          );
+        })};
+
+      </LineChart>
+    </ResponsiveContainer>
+  );
   
   return (
     <div>
@@ -192,41 +281,113 @@ const Strategy = () => {
           required
         />
 
-        <Button type="submit" disabled={loading}>Submit Strategy</Button>
+        <ButtonGroup>
+          <Button type="submit" disabled={loading}>Submit Strategy</Button>
+          <Button
+            type="button"
+            onClick={() => deleteStrategy(ticker)}
+            style={{
+              backgroundColor: '#ff4d4f',
+              color: 'white',
+              padding: '',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginLeft: '5px'
+            }}
+          >
+            Delete Strategy
+          </Button>
+        </ButtonGroup>
 
       </Form>
 
       {error && <div style={{ color: 'red' }}>{error}</div>}
 
-      {tradesData && (
+      {tradesData && resultsData && (
         <div>
-          <h4>Trades Data:</h4>
-          {tradesData.results.map((trade, index) => (
-            <div key={index}>
-              <p>Date: {trade.date}</p>
-              <p>Country: {trade.country}</p>
-              <p>Close Price: {trade.close_price}</p>
-              <p>Buy Signal: {trade.buy_signal}</p>
-              <p>Buy Price: {trade.buy_price}</p>
-              <p>Sell Signal: {trade.sell_signal}</p>
-              <p>Sell Price: {trade.sell_price}</p>
-            </div>
-          ))}
+          {renderLineChart()}
         </div>
       )}
 
-      {resultsData && (
-        <div>
-          <h4>Results Data:</h4>
-          <p>Country: {resultsData.country}</p>
-          <p>Total Profit: {resultsData.total_profit}</p>
-          <p>Total Number of Trades: {resultsData.total_number_of_trades}</p>
-          <p>Number of Profit Trades: {resultsData.number_profit_trades}</p>
-          <p>Number of Loss Trades: {resultsData.number_loss_trades}</p>
-          <p>Win Percentage: {resultsData.pct_win}</p>
-          <p>Loss Percentage: {resultsData.pct_loss}</p>
-          <p>Greatest Profit: {resultsData.greatest_profit}</p>
-          <p>Greatest Loss: {resultsData.greatest_loss}</p>
+      {tradesData && resultsData && (
+        <div
+          style={{
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            padding: '20px',
+            backgroundColor: '#ffffff',
+            marginTop: '20px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <h4
+            style={{
+              marginBottom: '20px',
+              fontSize: '1.5rem',
+              color: '#333',
+              borderBottom: '1px solid #ddd',
+              paddingBottom: '10px',
+            }}
+          >
+            Results Data
+          </h4>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '16px',
+              rowGap: '20px',
+              paddingBottom: '10px',
+            }}
+          >
+            <div>
+              <strong>Country Code:</strong> {resultsData.code.toUpperCase()}
+            </div>
+            <div>
+              <strong>Country:</strong> {resultsData.country.toUpperCase()}
+            </div>
+            <div>
+              <strong>Total Profit:</strong>{' '}
+              <span style={{ color: resultsData.total_profit >= 0 ? '#00b300' : '#ff4d4f' }}>
+                ${resultsData.total_profit}
+              </span>
+            </div>
+            <div>
+              <strong>Total Trades:</strong> {resultsData.total_number_of_trades}
+            </div>
+            <div>
+              <strong>Profit Trades:</strong> {resultsData.number_profit_trades}
+            </div>
+            <div>
+              <strong>Loss Trades:</strong> {resultsData.number_loss_trades}
+            </div>
+            <div>
+              <strong>Win Percentage:</strong>{' '}
+              <span style={{ color: '#00b300' }}>
+                {resultsData.pct_win}%
+              </span>
+            </div>
+            <div>
+              <strong>Loss Percentage:</strong>{' '}
+              <span style={{ color: '#ff4d4f' }}>
+                {resultsData.pct_loss}%
+              </span>
+            </div>
+            <div>
+              <strong>Greatest Profit:</strong>{' '}
+              <span style={{ color: '#00b300' }}>
+                ${resultsData.greatest_profit}
+              </span>
+            </div>
+            <div>
+              <strong>Greatest Loss:</strong>{' '}
+              <span style={{ color: '#ff4d4f' }}>
+                ${resultsData.greatest_loss}
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </div>

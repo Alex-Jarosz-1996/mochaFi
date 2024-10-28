@@ -18,6 +18,7 @@ class Results:
         Initializes the Results object with strategy data.
         """
         self._data = strategy._data.copy()
+        self.buy_sell_pairs_timestamp = self.collect_buy_sell_pairs_datetime()
         self.buy_sell_pairs = self.determine_buy_sell_pairs()
         self.total_profit = self.determine_total_profit()
         self.total_profit_per_trade = self.determine_total_profit_per_trade()
@@ -29,6 +30,42 @@ class Results:
         self.greatest_profit = self.determine_greatest_profit()
         self.greatest_loss = self.determine_greatest_loss()
 
+    
+    def collect_buy_sell_pairs_datetime(self):
+        """
+        Collects date-time buy/sell pairs with their respective datetime timestamp.
+        Ex:
+        [
+            (yyyy-mm-dd, buy_price1, yyyy-mm-dd, sell_price1),
+            (yyyy-mm-dd, buy_price2, yyyy-mm-dd, sell_price2),
+            ...
+            (yyyy-mm-dd, buy_priceN, yyyy-mm-dd, sell_priceN)
+        ]
+        """
+        buy_sell_pairs = []
+        current_buy = None
+        
+        for index, row in self._data.iterrows():
+            date = index.date().strftime('%Y-%m-%d') # aid serialisation from json to str
+            close_price = row['Close']
+            buy_signal = row['BuySignal']
+            sell_signal = row['SellSignal']
+            
+            # Check for a buy signal
+            if buy_signal == True:
+                current_buy = (date, close_price)
+            
+            # Check for a sell signal if there's a recorded buy
+            if sell_signal == True and current_buy:
+                buy_date, buy_price = current_buy
+                sell_date = date
+                sell_price = close_price
+                buy_sell_pairs.append((buy_date, buy_price, sell_date, sell_price))
+                current_buy = None
+        
+        return buy_sell_pairs
+    
+    
     def determine_buy_sell_pairs(self):
         """
         Identifies and returns a list of buy/sell pairs from the strategy data.
@@ -112,7 +149,7 @@ class Results:
         num_profit = self.number_profit_trades
         total_num_trades = self.total_number_of_trades
         pct_win = num_profit / total_num_trades
-        return round_result(pct_win)
+        return round_result(pct_win * 100)
 
     def determine_pct_loss_from_strategy(self):
         """
@@ -121,7 +158,7 @@ class Results:
         num_loss = self.number_loss_trades
         total_num_trades = self.total_number_of_trades
         pct_loss = num_loss / total_num_trades
-        return round_result(pct_loss)
+        return round_result(pct_loss * 100)
 
     def determine_greatest_profit(self):
         """
