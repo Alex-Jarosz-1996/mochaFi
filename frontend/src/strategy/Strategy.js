@@ -178,6 +178,7 @@ const Strategy = () => {
 
   const renderLineChart = () => (
     <ResponsiveContainer width="100%" height={400}>
+      <h4>{`Buy / Sell Chart for ${ticker}.`}</h4>
       <LineChart data={tradesData?.results || []}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" tickFormatter={formatXAxisDate} />
@@ -338,7 +339,7 @@ const Strategy = () => {
 
       {resultsData && alignedGrowthData.length > 0 && (
         <div style={{ marginTop: '20px' }}>
-          <h4>Hypothetical Investment Growth</h4>
+          <h4>{`Capital growth for ${ticker} using strategy ${strategyName} with an initial investment of $${resultsData.initial_investment}.`}</h4>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={alignedGrowthData}>
               <CartesianGrid strokeDasharray="3 3" />
