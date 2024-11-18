@@ -10,7 +10,8 @@ Flask==3.0.3
 Flask-Cors==4.0.1
 Flask-SQLAlchemy==3.1.1
 frozendict==2.4.4
-greenlet==3.0.3
+gevent==24.10.3
+greenlet==3.1.1
 html5lib==1.1
 identify==2.6.0
 idna==3.7
@@ -26,6 +27,7 @@ peewee==3.17.6
 platformdirs==4.2.2
 pre-commit==3.8.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
 pytz==2024.1
 PyYAML==6.0.2
 requests==2.32.3
@@ -38,5 +40,9 @@ tzdata==2024.1
 urllib3==2.2.2
 virtualenv==20.26.3
 webencodings==0.5.1
+websocket==0.2.1
+websockets==13.1
 Werkzeug==3.0.3
 yfinance==0.2.41
+zope.event==5.0
+zope.interface==7.1.1
