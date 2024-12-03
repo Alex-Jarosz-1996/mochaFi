@@ -18,7 +18,7 @@ const Chart = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/stock_price/${ticker}`);
+      const response = await fetch(`/api/stock_price/${ticker}`);
       if (!response.ok) {
         throw new Error('Stock data not found');
       }
@@ -36,7 +36,7 @@ const Chart = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/stock_price', {
+      const response = await fetch('/api/stock_price', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const Chart = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/stock_price_delete', {
+      const response = await fetch('/api/stock_price', {
         method: 'DELETE',
       });
       if (!response.ok) {

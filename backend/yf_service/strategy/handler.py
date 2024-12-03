@@ -1,8 +1,8 @@
 import pandas as pd
-from backend.strategies.strategy_ma import Strategy_MA
-from backend.strategies.strategy_macd import Strategy_MACD
-from backend.strategies.strategy_rsi import Strategy_RSI
-from backend.strategies.strategy_vw_macd import Strategy_VW_MACD
+from yf_service.strategy.ma import Strategy_MA
+from yf_service.strategy.macd import Strategy_MACD
+from yf_service.strategy.rsi import Strategy_RSI
+from yf_service.strategy.vw_macd import Strategy_VW_MACD
 
 class StrategyHandler:
     def __init__(self, data: pd.DataFrame):

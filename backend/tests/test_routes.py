@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from app import app, db, StockModel, StockPriceHistoryModel
+from mochaFi.backend.app import app, db, StockModel, StockPriceHistoryModel
 from datetime import datetime
 
 class TestStockEndpoints(unittest.TestCase):

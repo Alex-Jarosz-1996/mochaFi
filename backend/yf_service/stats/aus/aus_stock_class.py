@@ -1,4 +1,4 @@
-from backend.data.aus.aus_stock_methods import (
+from yf_service.stats.aus.aus_stock_methods import (
     get50_DayMovingAverage,
     get52_WkHighPrice,
     get52_WkLowPrice,
@@ -52,7 +52,7 @@ from backend.data.aus.aus_stock_methods import (
     getTrailingDividendRate,
     getTrailingDividendYield,
 )
-from backend.data.aus.websites import yahooFinancePriceData, yahooFinanceData
+from yf_service.stats.aus.websites import yahooFinancePriceData, yahooFinanceData
 
 
 class StockPriceMetrics:

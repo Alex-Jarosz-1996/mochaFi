@@ -1,6 +1,6 @@
 import yfinance as yf
 
-from backend.data.us.us_stock_methods import (
+from yf_service.stats.us.us_stock_methods import (
     getAcquirersMultiple,
     getBookValuePerShare,
     getCash,

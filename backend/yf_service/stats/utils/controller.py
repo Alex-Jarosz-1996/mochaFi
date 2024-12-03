@@ -1,5 +1,5 @@
-from backend.data.aus.aus_stock_class import AusStockClass
-from backend.data.us.us_stock_class import US_StockClass
+from yf_service.stats.aus.aus_stock_class import AusStockClass
+from yf_service.stats.us.us_stock_class import US_StockClass
 
 
 class StockController:

@@ -21,8 +21,6 @@ import {
   DesktopWrapper
 } from '../styles';
 
-const HOST_URL = "http://localhost:5000";
-
 const metricCategories = {
   "Basic Info": ["code", "country", "price", "marketCap", "numSharesAvail"],
   "Price Metrics": ["yearlyLowPrice", "yearlyHighPrice", "fiftyDayMA", "twoHundredDayMA"],
@@ -111,7 +109,7 @@ const Stats = () => {
 
   const fetchStocks = async () => {
     try {
-      const response = await axios.get(`${HOST_URL}/stocks`);
+      const response = await axios.get("/api/stock");
       setStocks(response.data);
     } catch (error) {
       console.error('Error fetching stocks:', error);
@@ -121,7 +119,7 @@ const Stats = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${HOST_URL}/stock`, { stock, country });
+      await axios.post("/api/stock", { stock, country });
       setStock('');
       setCountry('');
       fetchStocks();
@@ -132,8 +130,8 @@ const Stats = () => {
 
   const handleDelete = async (stockId) => {
     try {
-      await axios.delete(`${HOST_URL}/stock/${stockId}`);
-      fetchStocks();
+      setStocks((prevStocks) => prevStocks.filter(stock => stock.id !== stockId));
+      await axios.delete(`/api/stock/${stockId}`);
     } catch (error) {
       console.error('Error deleting stock:', error);
     }
@@ -141,12 +139,12 @@ const Stats = () => {
 
   const handleDeleteAll = async () => {
     try {
-      await axios.delete(`${HOST_URL}/stocks`);
-      fetchStocks();
+      setStocks([]);
+      await axios.delete(`/api/stock`);
     } catch (error) {
       console.error('Error deleting all stocks:', error);
     }
-  };
+  };  
 
   const toggleMetric = (metric) => {
     setVisibleMetrics(prev => ({...prev, [metric]: !prev[metric]}));

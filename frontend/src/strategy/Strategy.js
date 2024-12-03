@@ -22,7 +22,6 @@ const Strategy = () => {
     setLoading(true);
     setError(null);
 
-    const url = `${HOST_URL}/strategy`;
     const payload = {
       code: ticker,
       country: country,
@@ -34,7 +33,7 @@ const Strategy = () => {
     };
   
     try {
-      const response = await fetch(url, {
+      const response = await fetch("/api/strategy", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -70,8 +69,7 @@ const Strategy = () => {
     setError(null);
 
     try {
-      const url = `${HOST_URL}/trades/${ticker}`;
-      const response = await fetch(url);
+      const response = await fetch(`/api/strategy/trades/${ticker}`);
 
       if (!response.ok) {
         setError('Trade data not found');
@@ -97,8 +95,7 @@ const Strategy = () => {
     setError(null);
 
     try {
-      const url = `${HOST_URL}/results/${ticker}`;
-      const response = await fetch(url);
+      const response = await fetch(`/api/strategy/results/${ticker}`);
 
       if (!response.ok) {
         setError('Results data not found');
@@ -122,7 +119,7 @@ const Strategy = () => {
   const deleteStrategy = async (stock) => {
     setError(null);
     try {
-      const response = await fetch(`${HOST_URL}/remove_strategy/${stock}`, {
+      const response = await fetch(`/api/strategy/${stock}`, {
         method: 'DELETE',
       });
 

@@ -1,7 +1,7 @@
 import unittest
 from datetime import date
 from sqlalchemy import text
-from app import app, db, StockModel, StockPriceHistoryModel
+from mochaFi.backend.app import app, db, StockModel, StockPriceHistoryModel
 
 
 class TestModels(unittest.TestCase):

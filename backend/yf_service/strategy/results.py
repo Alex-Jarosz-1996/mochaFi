@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 
-from backend.common.core import round_result
+from yf_service.common.core import round_result
 
 class Results:
     """
