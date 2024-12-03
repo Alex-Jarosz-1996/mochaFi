@@ -3,8 +3,6 @@ import { Button, Form, Input, Select, DeleteButton, ButtonGroup } from '../style
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush, Bar, ReferenceDot } from 'recharts';
 import { format } from 'date-fns';
 
-const HOST_URL = "http://localhost:5000";
-
 const Strategy = () => {
   const [ticker, setTicker] = useState('');
   const [country, setCountry] = useState('');
