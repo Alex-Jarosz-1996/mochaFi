@@ -9,4 +9,4 @@ To use project:
 
 ## Backend Testing
 Execute the backend testing harness as follows:
-$ python -m unittest discover -s backend/tests
+$ python -m unittest discover -s backend/test
