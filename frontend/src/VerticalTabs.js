@@ -4,10 +4,8 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
-import Home from './home/Home';
 import Chart from './chart/Chart';
 import Strategy from './strategy/Strategy';
-import Trading from './trading/Trading';
 import Stats from './stats/Stats';
 
 function TabPanel(props) {
@@ -33,11 +31,9 @@ const VerticalTabs = () => {
   useEffect(() => {
     // Update tab based on current path
     switch(location.pathname) {
-      case '/home': setValue(0); break;
-      case '/stats': setValue(1); break;
-      case '/chart': setValue(2); break;
-      case '/strategy': setValue(3); break;
-      case '/trading': setValue(4); break;
+      case '/stats': setValue(0); break;
+      case '/chart': setValue(1); break;
+      case '/strategy': setValue(2); break;
       default: setValue(0); break;
     }
   }, [location]);
@@ -47,11 +43,9 @@ const VerticalTabs = () => {
 
     // Navigate based on tab selection
     switch(newValue) {
-      case 0: navigate('/home'); break;
-      case 1: navigate('/stats'); break;
-      case 2: navigate('/chart'); break;
-      case 3: navigate('/strategy'); break;
-      case 4: navigate('/trading'); break;
+      case 0: navigate('/stats'); break;
+      case 1: navigate('/chart'); break;
+      case 2: navigate('/strategy'); break;
       default: break;
     }
   };
@@ -82,21 +76,17 @@ const VerticalTabs = () => {
           }
         }}
       >
-        <Tab label="Home" />
         <Tab label="Stats" />
         <Tab label="Chart" />
         <Tab label="Strategy" />
-        <Tab label="Trading" />
       </Tabs>
 
       <Box sx={{ flexGrow: 1 }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/home" />} />
-          <Route path="/home" element={<TabPanel value={value} index={0}><Home /></TabPanel>} />
-          <Route path="/stats" element={<TabPanel value={value} index={1}><Stats /></TabPanel>} />
-          <Route path="/chart" element={<TabPanel value={value} index={2}><Chart /></TabPanel>} />
-          <Route path="/strategy" element={<TabPanel value={value} index={3}><Strategy /></TabPanel>} />
-          <Route path="/trading" element={<TabPanel value={value} index={4}><Trading /></TabPanel>} />
+          <Route path="/" element={<Navigate to="/stats" />} />
+          <Route path="/stats" element={<TabPanel value={value} index={0}><Stats /></TabPanel>} />
+          <Route path="/chart" element={<TabPanel value={value} index={1}><Chart /></TabPanel>} />
+          <Route path="/strategy" element={<TabPanel value={value} index={2}><Strategy /></TabPanel>} />
         </Routes>
       </Box>
     </Box>
