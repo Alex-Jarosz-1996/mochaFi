@@ -349,7 +349,7 @@ const Stats = () => {
         <Input
           type="text"
           value={stock}
-          onChange={(e) => setStock(e.target.value)}
+          onChange={(e) => setStock(e.target.value.toUpperCase())}
           placeholder="Enter stock symbol"
           required
         />

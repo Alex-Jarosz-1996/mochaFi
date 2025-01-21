@@ -237,7 +237,7 @@ const Strategy = () => {
         <Input
           type="text"
           value={ticker}
-          onChange={(e) => setTicker(e.target.value)}
+          onChange={(e) => setTicker(e.target.value.toUpperCase())}
           placeholder="Ticker"
           required
         />
