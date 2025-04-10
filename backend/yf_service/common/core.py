@@ -1,9 +1,13 @@
 import yfinance as yf
 import pandas as pd
 
+from setup_logging.setup_logging import logger
+
 
 def get_yf_stock_data(
-    ticker: str, time_period: str = "1y", time_interval: str = "1d"
+    ticker: str, 
+    time_period: str = "1y", 
+    time_interval: str = "1d"
 ) -> pd.DataFrame:
     """
     Retrieve stock data using Yahoo Finance API.
@@ -18,23 +22,20 @@ def get_yf_stock_data(
         return None
 
     try:
-        # Download data
+        logger.info("Download data")
         data = yf.download(tickers=ticker, period=time_period, interval=time_interval)
         
-        # Convert to pandas DataFrame
+        logger.info("Convert to pandas DataFrame")
         df = pd.DataFrame(data)
 
-        # Renaming Column name to not cause error
-        df.rename(columns={'Adj Close': 'Adj_Close'}, inplace=True)
-
-        # Round specified columns to 2 decimal places
-        columns_to_round = ['Open', 'High', 'Low', 'Close', 'Adj_Close']
+        logger.info("Round specified columns to 2 decimal places")
+        columns_to_round = ['Open', 'High', 'Low', 'Close']
         df[columns_to_round] = df[columns_to_round].round(2)
         
         return df
 
     except Exception as e:
-        print(f"Error occured: {e}")
+        logger.error(f"get_yf_stock_data error: {e}")
         return None
 
 

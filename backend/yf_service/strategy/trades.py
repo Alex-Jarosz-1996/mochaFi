@@ -9,10 +9,10 @@ class Trades:
         
         # signal determination
         self._data["BuySignal"] = self.determine_signals(data=self._data["BuyCondition"])
-        self._data["BuyPrice"] = self.determine_price_at_signal(data=self._data, signal='BuySignal')
+        self._data["SellSignal"] = self.determine_signals(data=self._data["SellCondition"])
         
         # price determination
-        self._data["SellSignal"] = self.determine_signals(data=self._data["SellCondition"])
+        self._data["BuyPrice"] = self.determine_price_at_signal(data=self._data, signal='BuySignal')
         self._data["SellPrice"] = self.determine_price_at_signal(data=self._data, signal='SellSignal')
 
     @staticmethod
@@ -41,4 +41,4 @@ class Trades:
         """
         Returns the price when the price signal is True, otherwise None.
         """
-        return data["Close"].where(data[signal].notna(), None)
+        return data["Close"].where(data[signal] == True, None)

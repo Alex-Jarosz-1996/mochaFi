@@ -1,6 +1,7 @@
 from db_service.db import DB_Client
 from models.result_model import ResultsModel
 from models.strategy_model import StrategyModel
+from setup_logging.setup_logging import logger
 from yf_service.common.core import get_yf_stock_data
 from yf_service.strategy.results import Results
 from yf_service.strategy.trades import Trades
@@ -12,9 +13,11 @@ class StrategyDB_Client(DB_Client):
 
     def get_trades_for_code(self, code: str) -> dict:
         try:
+            logger.info("get_trades_for_code: Getting all trades")
             strategy = self.session.query(StrategyModel).filter_by(code=code).order_by(StrategyModel.date).all()
 
             if strategy:
+                logger.info(f"get_trades_for_code: Trades were fetched for {code}.")
                 response_data = {
                     'code': code,
                     'results': [
@@ -32,17 +35,21 @@ class StrategyDB_Client(DB_Client):
                 return response_data
             
             else:
+                logger.info(f"get_trades_for_code: No trades fetched for {code}.")
                 return None
             
         except Exception as e:
             self.session.rollback()
+            logger.error(f"get_trades_for_code error: {e}")
             raise Exception(f"Failed to add strategy data: {e}")
 
     def get_results_for_code(self, code: str):
         try:
+            logger.info("get_results_for_code: Getting all results")
             result = self.session.query(ResultsModel).filter_by(code=code).first()
 
             if result:
+                logger.info(f"get_results_for_code: Results were fetched for {code}.")
                 response_data = {
                     'code': result.code,
                     'country': result.country,
@@ -63,14 +70,17 @@ class StrategyDB_Client(DB_Client):
                 return response_data
             
             else:
+                logger.info(f"get_results_for_code: No results fetched for {code}.")
                 return None
 
         except Exception as e:
             self.session.rollback()
+            logger.error(f"get_results_for_code error: {e}")
             raise Exception(f"Failed to get strategy results: {e}")
 
     def add_strategy_for_code(self, json_data: dict) -> bool:
         try:
+            logger.info("add_strategy_for_code: Adding individual strategy")
             code = json_data.get('code')
             country = json_data.get('country')
             strategy_name = json_data.get('strategy')
@@ -78,14 +88,18 @@ class StrategyDB_Client(DB_Client):
             time_interval = json_data.get('time_interval')
             window_slow = json_data.get('window_slow')
             window_fast = json_data.get('window_fast')
+            logger.info(f"Received: {code} | {country} | {strategy_name} | {time_period} | {time_interval} | {window_slow} | {window_fast} ")
 
+            logger.info("Checking for existing strategy and results.")
             existing_strategy = self.session.query(StrategyModel).filter_by(code=code).first()
             existing_results = self.session.query(ResultsModel).filter_by(code=code).first()
 
             if existing_strategy or existing_results:
+                logger.info("Strategy or results found.")
                 return False
 
             if not code or not country or not strategy_name or not time_period or not time_interval or not window_slow or not window_fast:
+                logger.info("Missing required fields: 'code', 'country', 'strategy_name', 'time_period', 'time_interval', 'window_slow' or 'window_fast'.")
                 raise ValueError("Missing required fields: 'code', 'country', 'strategy_name', 'time_period', 'time_interval', 'window_slow' or 'window_fast'.")
 
             if isinstance(window_slow, str):
@@ -94,12 +108,14 @@ class StrategyDB_Client(DB_Client):
             if isinstance(window_fast, str):
                 window_fast = int(window_fast)
 
+            logger.info("Retrieving stock data.")
             df = get_yf_stock_data(
                 ticker=code, 
                 time_period=time_period, 
                 time_interval=time_interval
             )
 
+            logger.info("Determining strategy")
             handler = StrategyHandler(data=df)
             strategy = handler.get_strategy(
                 strategy_name=strategy_name,
@@ -107,25 +123,34 @@ class StrategyDB_Client(DB_Client):
                 window_fast=window_fast
             )
 
+            logger.info("Checking for strategy existence")
             trades = Trades(strategy)
             existing_strategy = self.session.query(StrategyModel).filter_by(code=code).first()
+            logger.info(f"Output from quering StrategyModel to check if strategy already exists: {existing_strategy}")
+            
             if not existing_strategy:
+                logger.info(f"Adding strategy for {code} to db.")
                 for index, row in trades._data.iterrows():
                     new_strategy_entry = StrategyModel(
                         code=code,
                         country=country,
                         date=index.date(),
-                        close_price=row['Close'],
-                        buy_signal=row['BuySignal'],
-                        buy_price=row['BuyPrice'],
-                        sell_signal=row['SellSignal'],
-                        sell_price=row['SellPrice']
+                        close_price=float(row['Close']),
+                        buy_signal=bool(row['BuySignal'][0]),
+                        buy_price=bool(row['BuyPrice'][0]),
+                        sell_signal=bool(row['SellSignal'][0]),
+                        sell_price=bool(row['SellPrice'][0])
                     )
                     self.session.add(new_strategy_entry)
+                logger.info(f"Added strategy for {code} to db.")
 
+            logger.info("Checking for results existence")
             results = Results(trades)
             existing_results = self.session.query(ResultsModel).filter_by(code=code).first()
+            logger.info(f"Output from quering ResultsModel to check if strategy already exists: {existing_results}")
+            
             if not existing_results:
+                logger.info(f"Adding results for {code} to db.")
                 new_result_entry = ResultsModel(
                     code=code,
                     country=country,
@@ -144,38 +169,47 @@ class StrategyDB_Client(DB_Client):
                     greatest_loss=results.greatest_loss
                 )
                 self.session.add(new_result_entry)
+                logger.info(f"Added results for {code} to db.")
             
             self.session.commit()
             return True
             
         except ValueError as ve:
             self.session.rollback()
+            logger.error(f"add_strategy_for_code ValueError: {ve}")
             raise ve
         
         except Exception as e:
             self.session.rollback()
+            logger.error(f"add_strategy_for_code error: {e}")
             raise Exception(f"Failed to add strategy data: {e}")
         
     def delete_strategy_for_code(self, code: str):
         try:
+            logger.info("delete_strategy_for_code: Deleting strategy and result")
             strategy = self.session.query(StrategyModel).filter_by(code=code).first()
             result = self.session.query(ResultsModel).filter_by(code=code).first()
 
             if not strategy or not result:
+                logger.info(f"Strategy or result not found for {code}")
                 return False
             
             if strategy:
+                logger.info(f"Strategy found. Deleting for stock {code}.")
                 self.session.delete(strategy)
 
             if result:
+                logger.info(f"Results found. Deleting for stock {code}.")
                 self.session.delete(result)
 
             self.session.commit()
 
+            logger.info(f"Finished deleting strategy or results for stock {code}.")
             return True
 
         except Exception as e:
             self.session.rollback()
+            logger.error(f"delete_strategy_for_code error: {e}")
             raise Exception(f"Failed to delete strategy data: {e}")
         
 strategyDB_Client = StrategyDB_Client()

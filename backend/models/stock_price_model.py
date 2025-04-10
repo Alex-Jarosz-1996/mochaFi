@@ -20,7 +20,6 @@ class StockPriceModel(Base):
     high_price = Column(Float, nullable=True)
     low_price = Column(Float, nullable=True)
     close_price = Column(Float, nullable=True)
-    adj_close_price = Column(Float, nullable=True)
     volume = Column(BigInteger, nullable=True)
 
     # Composite unique constraint to ensure no duplicate entries for a stock on a given date

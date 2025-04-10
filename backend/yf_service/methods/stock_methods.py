@@ -2,6 +2,7 @@ from sqlalchemy.exc import IntegrityError
 
 from db_service.db import DB_Client
 from models.stock_model import StockModel
+from setup_logging.setup_logging import logger
 from yf_service.stats.utils.controller import StockController
 
 class StockDB_Client(DB_Client):
@@ -14,12 +15,16 @@ class StockDB_Client(DB_Client):
         Retrieves all stocks from the database.
         """
         try:
+            logger.info("get_all_stocks: Getting all stocks")
             all_stocks = self.session.query(StockModel).all()
+            output = all_stocks if all_stocks else None
 
-            return all_stocks if all_stocks else None
+            logger.info(f"get_all_stocks output: {output}")
+            return output
 
         except Exception as e:
             self.session.rollback()
+            logger.error(f"get_all_stocks error: {e}")
             raise e
 
     
@@ -28,13 +33,17 @@ class StockDB_Client(DB_Client):
         Adds a single stock to the database if it does not already exist.
         """
         try:
+            logger.info("add_single_stock: Adding single stock")
             code = json_data.get("stock")
             country = json_data.get("country")
+            logger.info(f"Received: {code} | {country}")
 
             if not code or not country:
+                logger.error("Both 'code' and 'country' are required.")
                 raise ValueError("Both 'code' and 'country' are required.")
             
             stock_obj = StockController(code, country)
+            logger.info("Received output from StockController(code, country).")
             
             new_stock = StockModel(
                 code=stock_obj.si.ticker,
@@ -95,22 +104,27 @@ class StockDB_Client(DB_Client):
             
             self.session.add(new_stock)
             self.session.commit()
+            logger.info(f"Added stock {code} to db.")
             return True
 
         except IntegrityError as ie:
             self.session.rollback()
+            logger.error(f"add_single_stock IntegrityError: {ie}")
             raise ie
         
         except TypeError as te:
             self.session.rollback()
+            logger.error(f"add_single_stock TypeError: {te}")
             raise te
         
         except ValueError as ve:
             self.session.rollback()
+            logger.error(f"add_single_stock ValueError: {ve}")
             raise ve
 
         except Exception as e:
             self.session.rollback()
+            logger.error(f"add_single_stock error: {e}")
             raise e
 
 
@@ -119,13 +133,16 @@ class StockDB_Client(DB_Client):
         Removes all stocks from the database.
         """
         try:
+            logger.info("delete_all_stocks: Deleting all stocks")
             rows_deleted = self.session.query(StockModel).delete()
             self.session.commit()
 
+            logger.info(f"Deleted {rows_deleted} rows.")
             return rows_deleted > 0
 
         except Exception as e:
             self.session.rollback()
+            logger.error(f"delete_all_stocks error: {e}")
             raise Exception(f"Failed to delete all stocks: {e}")
 
     
@@ -134,18 +151,22 @@ class StockDB_Client(DB_Client):
         Removes a single stock from the database.
         """
         try:
+            logger.info("delete_single_stock: Deleting a single stock.")
             stock = self.session.query(StockModel).get(stock_id)
 
             if not stock:
+                logger.info("No stock to delete.")
                 return False
             
             self.session.delete(stock)
             self.session.commit()
 
+            logger.info(f"Deleting stock with id: {stock_id}")
             return True
 
         except Exception as e:
             self.session.rollback()
+            logger.error(f"delete_single_stock error: {e}")
             raise Exception(f"Failed to delete single stock: {e}")
 
 stockDB_Client = StockDB_Client()
