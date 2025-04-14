@@ -52,16 +52,16 @@ class Results:
         
         for index, row in self._data.iterrows():
             date = index.date().strftime('%Y-%m-%d') # aid serialisation from json to str
-            close_price = row['Close']
-            buy_signal = row['BuySignal']
-            sell_signal = row['SellSignal']
+            close_price = row['Close'].iloc[0]
+            buy_signal = row['BuySignal'].iloc[0]
+            sell_signal = row['SellSignal'].iloc[0]
             
             # Check for a buy signal
-            if buy_signal == True:
+            if buy_signal:
                 current_buy = (date, close_price)
             
             # Check for a sell signal if there's a recorded buy
-            if sell_signal == True and current_buy:
+            if sell_signal and current_buy:
                 buy_date, buy_price = current_buy
                 sell_date = date
                 sell_price = close_price
@@ -75,19 +75,10 @@ class Results:
         """
         Identifies and returns a list of buy/sell pairs from the strategy data.
         """
-        buy_prices = self._data['BuyPrice']
-        sell_prices = self._data['SellPrice']
-
         pairs = []
-        current_buy = None
-
-        for buy_price, sell_price in zip(buy_prices, sell_prices):
-            if current_buy is None and not pd.isna(buy_price):
-                current_buy = buy_price
-
-            elif current_buy is not None and not pd.isna(sell_price):
-                pairs.append((current_buy, sell_price))
-                current_buy = None
+        
+        for _, buy_price, _, sell_price in self.buy_sell_pairs_timestamp:
+            pairs.append((buy_price, sell_price))
 
         return pairs
 
@@ -97,11 +88,8 @@ class Results:
         Determine profit / loss per trade multiplied by number of shares.
         Returns profit per trade and sell date.
         """
-        buy_sell_pairs = self.collect_buy_sell_pairs_datetime()
-        
         profit_per_trade_list = []
-        for buy_sell_pair in buy_sell_pairs:
-            buy_price, sell_date, sell_price = buy_sell_pair[1], buy_sell_pair[2], buy_sell_pair[-1]
+        for _, buy_price, sell_date, sell_price in self.buy_sell_pairs_timestamp:
 
             num_shares = math.floor(self.INITIAL_INVESTMENT / buy_price)
             profit_per_trade = round(num_shares * (sell_price - buy_price), 2)
@@ -116,36 +104,35 @@ class Results:
         Determines strategy Return on Investment for investment period as a pct of initial investment.
         """
         total_profit = 0
-        for profit in self.determine_profit_loss_dependent_on_shares():
-            total_profit += profit[-1]
+        for _, profit in self.profit_loss_shares:
+
+            total_profit += profit
 
         strategy_roi = 100 * (total_profit / self.INITIAL_INVESTMENT)
-        return strategy_roi
+        return round(strategy_roi, 2)
     
     
     def determine_total_profit(self):
         """
         Calculates the total profit or loss from all buy/sell pairs.
         """
-        total = 0
-        for result in self.buy_sell_pairs:
-            buy_price = result[0]
-            sell_price = result[-1]
-            total += (sell_price - buy_price)
+        total_profit = 0
+        for _, profit in self.profit_loss_shares:
+            total_profit += profit
         
-        return round_result(total)
+        return round(total_profit, 2)
 
+    
     def determine_total_profit_per_trade(self):
         """
         Calculates the profit or loss for each buy/sell pair.
         """
-        profit = []
-        for result in self.buy_sell_pairs:
-            buy_price = result[0]
-            sell_price = result[-1]
-            profit.append(round_result(sell_price - buy_price))
+        profit_per_trade_list = []
+        for _, profit in self.profit_loss_shares:
+            profit_per_trade_list.append(profit)
         
-        return profit
+        return profit_per_trade_list
+
 
     def determine_number_of_trades(self):
         """
@@ -153,31 +140,30 @@ class Results:
         """
         return len(self.buy_sell_pairs)
 
+
     def determine_number_profit_trades(self):
         """
         Calculates the number of trades that resulted in a profit.
         """
         num_profit = 0
-        for result in self.buy_sell_pairs:
-            buy_price = result[0]
-            sell_price = result[-1]
+        for buy_price, sell_price in self.buy_sell_pairs:
             if sell_price > buy_price:
                 num_profit += 1
         
         return num_profit
+
 
     def determine_number_loss_trades(self):
         """
         Calculates the number of trades that resulted in a loss.
         """
         num_loss = 0
-        for result in self.buy_sell_pairs:
-            buy_price = result[0]
-            sell_price = result[-1]
+        for buy_price, sell_price in self.buy_sell_pairs:
             if sell_price < buy_price:
                 num_loss += 1
         
         return num_loss
+
 
     def determine_pct_win_from_strategy(self):
         """
@@ -188,6 +174,7 @@ class Results:
         pct_win = num_profit / total_num_trades
         return round_result(pct_win * 100)
 
+
     def determine_pct_loss_from_strategy(self):
         """
         Calculates the percentage of trades that resulted in a loss.
@@ -197,11 +184,13 @@ class Results:
         pct_loss = num_loss / total_num_trades
         return round_result(pct_loss * 100)
 
+
     def determine_greatest_profit(self):
         """
         Identifies the highest profit from a single trade.
         """
         return round_result(max(self.total_profit_per_trade))
+
 
     def determine_greatest_loss(self):
         """

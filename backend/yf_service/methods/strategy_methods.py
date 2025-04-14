@@ -131,15 +131,21 @@ class StrategyDB_Client(DB_Client):
             if not existing_strategy:
                 logger.info(f"Adding strategy for {code} to db.")
                 for index, row in trades._data.iterrows():
+                    cl = float(row['Close'].iloc[0])
+                    bs = row['BuySignal'].iloc[0]
+                    bp = row['BuyPrice'].iloc[0]
+                    ss = row['SellSignal'].iloc[0]
+                    sp = row['SellPrice'].iloc[0]
+
                     new_strategy_entry = StrategyModel(
                         code=code,
                         country=country,
                         date=index.date(),
-                        close_price=float(row['Close']),
-                        buy_signal=bool(row['BuySignal'][0]),
-                        buy_price=bool(row['BuyPrice'][0]),
-                        sell_signal=bool(row['SellSignal'][0]),
-                        sell_price=bool(row['SellPrice'][0])
+                        close_price=cl,
+                        buy_signal=bs,
+                        buy_price=bp,
+                        sell_signal=ss,
+                        sell_price=sp
                     )
                     self.session.add(new_strategy_entry)
                 logger.info(f"Added strategy for {code} to db.")
