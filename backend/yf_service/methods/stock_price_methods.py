@@ -71,7 +71,6 @@ class StockPriceDB_Client(DB_Client):
 
             logger.info("Retrieving stock prices.")
             df = get_yf_stock_data(ticker=code, time_period=time_period, time_interval=time_interval)
-            logger.info(f"Output from get_yf_stock_data: {df}")
 
             logger.info("Checking that output df contains all columns names.")
             required_fields = ['Open', 'High', 'Low', 'Close', 'Volume']
@@ -95,11 +94,11 @@ class StockPriceDB_Client(DB_Client):
                         code=code,
                         country=country,
                         date=index.date(),
-                        open_price=row['Open'],
-                        high_price=row['High'],
-                        low_price=row['Low'],
-                        close_price=row['Close'],
-                        volume=float(row['Volume'])
+                        open_price=row['Open'].iloc[0],
+                        high_price=row['High'].iloc[0],
+                        low_price=row['Low'].iloc[0],
+                        close_price=row['Close'].iloc[0],
+                        volume=float(row['Volume'].iloc[0])
                     )
                     self.session.add(new_price)
                 logger.info(f"Added stock prices for {code} to db.")

@@ -17,7 +17,7 @@ def get_code_trades(code):
     try:
         logger.info("Executing GET /api/strategy/trades/<string:code> endpoint.")
         result = strategyDB_Client.get_trades_for_code(code=code)
-        logger.info(f"Received GET /api/strategy/trades/<string:code> with output: {result}")
+        logger.info(f"Received GET /api/strategy/trades/<string:code>")
 
         if result is not None:
             logger.info("Trades found. Returning HTTP 200 Ok status.")
@@ -37,7 +37,7 @@ def get_code_results(code):
     try:
         logger.info("Executing GET /api/strategy/results/<string:code> endpoint.")
         result = strategyDB_Client.get_results_for_code(code=code)
-        logger.info(f"Received GET /api/strategy/results/<string:code> with output: {result}")
+        logger.info(f"Received GET /api/strategy/results/<string:code>")
 
         if result is not None:
             logger.info("Results found. Returning HTTP 200 Ok status.")

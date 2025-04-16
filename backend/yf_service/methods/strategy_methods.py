@@ -94,8 +94,8 @@ class StrategyDB_Client(DB_Client):
             existing_strategy = self.session.query(StrategyModel).filter_by(code=code).first()
             existing_results = self.session.query(ResultsModel).filter_by(code=code).first()
 
-            if existing_strategy or existing_results:
-                logger.info("Strategy or results found.")
+            if existing_strategy and existing_results:
+                logger.info("Strategy and results found.")
                 return False
 
             if not code or not country or not strategy_name or not time_period or not time_interval or not window_slow or not window_fast:
@@ -196,17 +196,15 @@ class StrategyDB_Client(DB_Client):
             strategy = self.session.query(StrategyModel).filter_by(code=code).first()
             result = self.session.query(ResultsModel).filter_by(code=code).first()
 
-            if not strategy or not result:
-                logger.info(f"Strategy or result not found for {code}")
+            if not (strategy and result):
+                logger.info(f"Strategy and result not found for {code}")
                 return False
             
-            if strategy:
-                logger.info(f"Strategy found. Deleting for stock {code}.")
-                self.session.delete(strategy)
+            logger.info(f"Strategy found. Deleting for stock {code}.")
+            self.session.delete(strategy)
 
-            if result:
-                logger.info(f"Results found. Deleting for stock {code}.")
-                self.session.delete(result)
+            logger.info(f"Results found. Deleting for stock {code}.")
+            self.session.delete(result)
 
             self.session.commit()
 
